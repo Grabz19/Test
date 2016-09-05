@@ -1,15 +1,49 @@
+<!--
+	LIST OF SUPPORTED ATTRIBUTES:
+	
+	data-page - Number. Used in the root elements only, to mark separate pages.
+	data-page-flag-resetvisited - Number or Array of Number. Only works if the element also has data-page. Resets the visit counter on specified page or pages to zero before this page is loaded.
+	
+	data-item - String or Array of String. This makes the element clickable, which in turn adds the item or items of the specified names to the inventory. Can be used as page attribute, which automatically adds the item to the inventory when the page is loaded.
+	data-item-amount - Number or Array of Number. Only works if the element also has data-item. Specifies the number of items or uses to give this item. If this isn't specified, the item receives 1 use.
+	data-item-name - String or Array of String. Only works if the element also has data-item. Specifies the display name for the item or items.
+	data-item-description - String or Array of String. Only works if the element also has data-item. Specifies the display description for the item.
+	data-item-description-override - Boolean. Only works if the element also has data-item-description. If true, if player already has this item, it will receive the specified description. If false, the specified description will be ignored. Defaults to false.
+	
+	data-goto - Number. Makes the element clickable and leads to the selected page.
+	data-goto-arg-id - Number. Only works if the element also has data-goto. Sends an id to the target page.
+	
+	data-showif-arg-id - Number. Makes the element visible only if the specified id was sent.
+	data-showif-arg-notid - Number. Makes the element visible only if the specified id was not sent.
+	data-showif-arg-visited - Number or Array of Number. Makes the element visible if the specified page or pages were visited at least once.
+	data-showif-arg-visited-times - Number. Only works if the element also has data-showif-arg-visited. Specifies the number of times the specified page has to have been visited for the element to be visible.
+	data-showif-arg-notvisited - Number or Array of Number. Makes the element visible if the specified page has never been visited.
+	data-showif-arg-notvisited-times - Number. Only works if the element also has data-showif-arg-notvisited. Specifies the number of times the specified page has to have been visited for the element to be invisible.
+	
+	data-gameover - String. Makes the element clickable which restarts the game.
+	
+	
+	EXAMPLES:
+	
+	<p data-showif-arg-visited="1">Show if visited 1 times.</p>
+	<p data-showif-arg-visited="1" data-showif-arg-visited-times="3">Show if visited 3 times.</p>
+	<p data-showif-arg-notvisited="1">Hide if visited 1 times.</p>
+	<p data-showif-arg-notvisited="1" data-showif-arg-notvisited-times="3">Hide if visited 3 times.</p>
+
+-->
+
 <div data-page="1">
-	<p>You regain consciousness as you hear the buzzing sound of a familiar alarm clock.
+	<p>You regain consciousness as you hear the buzzing sound of a familiar alarm clock.</p>
 
-	<p>It's 6:00 AM.
+	<p>It's 6:00 AM.</p>
 
-	<p>You reach your hand out towards the desk to your right to shut off the alarm. Light illuminates the room as you flick the switch on the bedroom lamp. As you stand up, a cold shiver goes down your spine. You feel uneasy yet relieved. You can't explain the feeling.
+	<p>You reach your hand out towards the desk to your right to shut off the alarm. Light illuminates the room as you flick the switch on the bedroom lamp. As you stand up, a cold shiver goes down your spine. You feel uneasy yet relieved. You can't explain the feeling.</p>
 
-	<p>You can't help but notice the lamp is shining more dimly than usual.
+	<p>You can't help but notice the lamp is shining more dimly than usual.</p>
 
-	<p>You walk up to the window to your left and peek through the curtain. It's pitch black outside.
+	<p>You walk up to the window to your left and peek through the curtain. It's pitch black outside.</p>
 
-	<p>As you look, you spot an unfamiliar reflection in the window. You turn around quickly. There is a note on your closet. It reads "7RC9". The letters are inscribed with crayons, and the handwriting looks as if it was written by a child. You decide to keep the note.</p>
+	<p>As you look, you spot an unfamiliar reflection in the window. You turn around quickly. There is a note on your closet. It reads "7RC9". The letters are inscribed with crayons, and the handwriting looks as if it was written by a child. <a data-item="starting_note" data-item-name="Note from the closet" data-item-description='A mysterious note you found on your bedroom closet. It reads "7RC9", written by a child with crayons.'>Do you keep the note?</p>
 	
 	<a data-goto="3"><br>Open the closet.</a>
 	<a data-goto="2" data-goto-arg-id="0"><br>Look around for clues.</a>
@@ -21,9 +55,9 @@
 
 <div data-page="2">
 	<p data-showif-arg-id="0">You decide to look around for clues. At quick glance, there does not appear to be anything particularly unusual about your bedroom. You're not exactly sure what you're even looking for.</p>
-	<p>Out of sheer curiosity, you decide to look under the bed. You walk up to it and lay on your side, pressing your head against the floor. You hesitate for a second, reassuring yourself that tales about monsters under the bed are just fiction. You pull up the sheets.
+	<p>Out of sheer curiosity, you decide to look under the bed. You walk up to it and lay on your side, pressing your head against the floor. You hesitate for a second, reassuring yourself that tales about monsters under the bed are just fiction. You pull up the sheets.</p>
 
-	<p>Nothing.
+	<p>Nothing.</p>
 
 	<p>You stand up.</p>
 
@@ -35,13 +69,13 @@
 </div>
 
 <div data-page="3">
-	<p>"Who put this here?" - you think to yourself.
+	<p>"Who put this here?" - you think to yourself.</p>
 
-	<p>Several moments of confusion later. "Oh! It must have been that kid Jeremy- of the neighbors that live just outside the street. He always pulls random pranks on me when I wake up to go to work." - you speak loudly to yourself with great confidence.
+	<p>Several moments of confusion later. "Oh! It must have been that kid Jeremy- of the neighbors that live just outside the street. He always pulls random pranks on me when I wake up to go to work." - you speak loudly to yourself with great confidence.</p>
 	
-	<p>"I'm sure he's hiding in this closet. Let us see who's the clever one this time, right Jeremy? You're not escaping me this time." - you add.
+	<p>"I'm sure he's hiding in this closet. Let us see who's the clever one this time, right Jeremy? You're not escaping me this time." - you add.</p>
 	
-	<p>You grab the handle and start slowly pulling it towards you. A gasp of old air escapes the closet. Suddenly...
+	<p>You grab the handle and start slowly pulling it towards you. A gasp of old air escapes the closet. Suddenly...</p>
 	
 	<p>Nothing unusual whatsoever. Just your regular old clothes. Buzzkill.</p>
 
@@ -54,15 +88,15 @@
 </div>
 
 <div data-page="4">
-	<p>You're starting to feel pretty ill. You decide it would be better to skip work today and just go back to bed. You pull out your cellphone and start dialing Zach - your boss.
+	<p>You're starting to feel pretty ill. You decide it would be better to skip work today and just go back to bed. You pull out your cellphone and start dialing Zach - your boss.</p>
 	
-	<p>... ... ... "This is Zach. If you're hearing this message it means I'm busy and can't pick up the phone right now. Leave a message after the beep.". *beep*
+	<p>... ... ... "This is Zach. If you're hearing this message it means I'm busy and can't pick up the phone right now. Leave a message after the beep.". *beep*</p>
 	
-	<p>You cancel the call. "Odd" - you think to yourself - "It's very unusual for my boss not to pick up the phone. Let's try again.".
+	<p>You cancel the call. "Odd" - you think to yourself - "It's very unusual for my boss not to pick up the phone. Let's try again.".</p>
 	
-	<p>... ... ... "This is Zach. If you're hearing this message it means I'm busy and can't pick up the phone right now. Leave a message after the beep.". *beep*
+	<p>... ... ... "This is Zach. If you're hearing this message it means I'm busy and can't pick up the phone right now. Leave a message after the beep.". *beep*</p>
 	
-	<p>"Ah screw it" - you think in your head - "I'll just leave him a message that I'm not coming to work today.". You start speaking - "Hi boss, it's me, John. I'm feeling sick and I can't come to work today. I'm leaving you a message because you didn't pick up the phone.".
+	<p>"Ah screw it" - you think in your head - "I'll just leave him a message that I'm not coming to work today.". You start speaking - "Hi boss, it's me, John. I'm feeling sick and I can't come to work today. I'm leaving you a message because you didn't pick up the phone.".</p>
 	
 	<p>With that done, you decide to go back to bed.</p>
 	
@@ -92,9 +126,9 @@
 <div data-page="6">
 	<p data-showif-arg-visited="[3, 5]">"Man, that damn Jeremy. I'm sick of his antics. I'm going to get you Jeremy!"</p>
 	
-	<p>You begin making an effort to climb out of the window. You slide open the curtains and twist the handle. The window opens up easily.
+	<p>You begin making an effort to climb out of the window. You slide open the curtains and twist the handle. The window opens up easily.</p>
 	
-	<p>You live on the first floor, so jumping out shouldn't harm you in any way. However, as you look out, you notice that you can't see the ground below your apartment.
+	<p>You live on the first floor, so jumping out shouldn't harm you in any way. However, as you look out, you notice that you can't see the ground below your apartment.</p>
 	
 	<p>This alarms you at first, but you remember that it's simply dark outside. You quickly consider whether your stunt is actually worth your time.</p>
 	
@@ -103,11 +137,11 @@
 </div>
 
 <div data-page="7">
-	<p>After a brief period of thought you've come back to your senses.
+	<p>After a brief period of thought you've come back to your senses.</p>
 	
-	<p>"This is crazy. What am I even doing?" - you say - "I must have been possessed for a moment there."
+	<p>"This is crazy. What am I even doing?" - you say - "I must have been possessed for a moment there."</p>
 	
-	<p data-showif-arg-notvisited="5">You decide to peek through the window to see if anyone outside spotted your crazy moves. You almost climbed out after all.
+	<p data-showif-arg-notvisited="5">You decide to peek through the window to see if anyone outside spotted your crazy moves. You almost climbed out after all.</p>
 	
 	<p data-showif-arg-notvisited="5">Complete darkness.</p>
 	
@@ -135,15 +169,15 @@
 <div data-page="9">
 	<p>You decide to walk out of the room and investigate. <span data-showif-arg-visited="3">"If Jeremy is the one behind this, he might still be around. I'll catch him red-handed!".</span></p>
 	
-	<p>You reach your hand towards the door handle and try to open the door.
+	<p>You reach your hand towards the door handle and try to open the door.</p>
 	
-	<p>The door doesn't budge.
+	<p>The door doesn't budge.</p>
 	
 	<p>A quick surge of anxiety goes over you. "Why is the door closed? I never lock my bedroom door. What happened? Is this a joke?<span data-showif-arg-visited="3"> Jeremy, if you're still here, this is not a joke.</span>"</p>
 	
-	<p>"Keys, that's right." - you say as you calm down - "My keys should be here somewhere. I must have locked the door by accident yesterday"
+	<p>"Keys, that's right." - you say as you calm down - "My keys should be here somewhere. I must have locked the door by accident yesterday"</p>
 	
-	<p>You look into your pockets to find nothing of value.
+	<p>You look into your pockets to find nothing of value.</p>
 	
 	<p>"Now, where could I have put them."</p>
 	
@@ -156,9 +190,9 @@
 	
 	<p data-showif-arg-notvisited="2">You wonder if your keys might've fallen under the bed while you were sleeping.</p>
 	
-	<p>You walk up to the bed and lay on the floor.
+	<p>You walk up to the bed and lay on the floor.</p>
 	
-	<p>You peek under and...
+	<p>You peek under and...</p>
 	
 	<p>Nothing. Just a bunch of dust.</p>
 	
@@ -170,21 +204,21 @@
 	
 	<p data-showif-arg-notvisited="10">Right, I must have left the keys in my work clothes from yesterday. Let's have a look.</p>
 	
-	<p>You open the closet.
+	<p>You open the closet.</p>
 	
-	<p>Darkness.
+	<p>Darkness.</p>
 	
-	<p>You look around you.
+	<p>You look around you.</p>
 	
-	<p>Darkness.
+	<p>Darkness.</p>
 	
-	<p>What's happening?
+	<p>What's happening?</p>
 	
-	<p>Darkness.
+	<p>Darkness.</p>
 	
-	<p data-showif-arg-visited="7">You jump back from the closet and fall right through the open window.
+	<p data-showif-arg-visited="7">You jump back from the closet and fall right through the open window.</p>
 	
-	<p data-showif-arg-notvisited="7">You jump back from the closet and hit the window opposite of it. You look around. "Did the lamp break? Am I crazy?". You see nothing. Soon, you feel nothing.
+	<p data-showif-arg-notvisited="7">You jump back from the closet and hit the window opposite of it. You look around. "Did the lamp break? Am I crazy?". You see nothing. Soon, you feel nothing.</p>
 	
 	<p>Your presence is no more.</p>
 	
@@ -192,15 +226,15 @@
 </div>
 
 <div data-page="12">
-	<p>You regain consciousness as you hear the buzzing sound of a familiar alarm clock.
+	<p>You regain consciousness as you hear the buzzing sound of a familiar alarm clock.</p>
 
-	<p>It's 6:00 AM.
+	<p>It's 6:00 AM.</p>
 
-	<p>You reach your hand out towards the desk to your right to shut off the alarm. You flick the switch on the bedroom lamp.
+	<p>You reach your hand out towards the desk to your right to shut off the alarm. You flick the switch on the bedroom lamp.</p>
 	
-	<p>The lamp barely gives out any light. "Weird" - you think - "The light seemed fine yesterday. Hang on a minute! Has all this not happened just now?".
+	<p>The lamp barely gives out any light. "Weird" - you think - "The light seemed fine yesterday. Hang on a minute! Has all this not happened just now?".</p>
 	
-	<p>"I must have been dreaming... it felt so real though." - you wonder.
+	<p>"I must have been dreaming... it felt so real though." - you wonder.</p>
 
 	<p>Your eyes shift towards the closet. The note is not there.</p>
 	
@@ -241,11 +275,11 @@
 	
 	<p>"Late?" - you think - "But it's..." - you turn your head towards the clock which reads 8:30 AM. "I could have sworn..."</p>
 	
-	<p>"I'm sorry boss." - you say apologetically, acting sick - "I haven't been feeling very well this morning. I overslept. Can I take the day off?".
+	<p>"I'm sorry boss." - you say apologetically, acting sick - "I haven't been feeling very well this morning. I overslept. Can I take the day off?".</p>
 	
 	<p data-showif-arg-id="5">You suddenly feel relief knowing you're talking to another human being.</p>
 	
-	<p>"It's fine." - you hear in response - "Try to let us know next time. We were worried about you. We were worried about you. We really were.". *beep*
+	<p>"It's fine." - you hear in response - "Try to let us know next time. We were worried about you. We were worried about you. We really were.". *beep*</p>
 	
 	<p data-showif-arg-id="5">You stand up from the ground.</p>
 	

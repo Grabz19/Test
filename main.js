@@ -1,3 +1,5 @@
+"use strict";
+
 function PageLoader(src) {
 	var listener = null;
 	
@@ -56,13 +58,24 @@ function Page(node, visited) {
 	this.visited = visited;
 }
 
+function InventoryItem(name, amount, displayName, description) {
+	this.name = name;
+	this.amount = amount;
+	this.displayName = displayName;
+	this.description = description;
+}
+
 function Logic() {
-	var pageContainer = document.getElementById('page');
+	var pageContainer = document.getElementById('page_container');
+	var inventoryContainer = document.getElementById('inventory_container');
+	var inventoryInfobox = document.getElementById('inventory_infobox');
 	
 	var pages = null;
+	var inventory = null;
 	
 	function initialize(rawPageArray) {
 		pages = [];
+		inventory = [];
 		
 		var i, j;
 		for(i = 0; i < rawPageArray.length; i++) {
@@ -72,6 +85,111 @@ function Logic() {
 			}
 			
 			pages[i] = new Page(rawPageArray[i], 0);
+		}
+	}
+	
+	function clearInventory() {
+		inventory.splice(0, inventory.length);
+		displayInventory();
+	}
+	
+	function addItemToInventory(inventoryItem, override) {
+		if(inventoryItem instanceof InventoryItem) {
+			var i;
+			for(i = 0; i < inventory.length; i++) {
+				if(inventoryItem.name == inventory[i].name) {
+					if(inventoryItem.amount === null)
+						inventory[i].amount++;
+					else
+						inventory[i].amount += inventoryItem.amount;
+					
+					if(inventoryItem.displayName)
+						inventory[i].displayName = inventoryItem.displayName;
+					if(override && inventoryItem.description)
+						inventory[i].description = inventoryItem.description;
+					
+					displayInventory();
+					return true;
+				}
+			}
+			inventory.push(inventoryItem);
+			displayInventory();
+			return true;
+		}
+		return false;
+	}
+	
+	function addItemToInventoryFromNode(node) {
+		var item = getSpecialAttribute(node, "item");
+		
+		if(item !== null) {
+			var itemAmount = getSpecialAttribute(node, "item-amount");
+			var itemName = getSpecialAttribute(node, "item-name");
+			var itemDescription = getSpecialAttribute(node, "item-description");
+			var itemDescriptionOverride = getSpecialAttribute(node, "item-description-override");
+			
+			var inventoryItem = new InventoryItem(
+				item,
+				itemAmount === null ? 1 : itemAmount,
+				itemName,
+				itemDescription
+			);
+			
+			addItemToInventory(inventoryItem, itemDescriptionOverride === null ? false : itemDescriptionOverride);
+			return true;
+		}
+		return false;
+	}
+	
+	function removeItemFromInventory(name, amount) {
+		var i;
+		for(i = 0; i < inventory.length; i++) {
+			if(inventory[i].name == name) {
+				inventory[i].amount -= amount;
+				
+				if(inventory[i].amount == 0) {
+					inventory.splice(i, 1);
+					displayInventory();
+					return true;
+				}
+				else if(inventory[i].amount < 0) {
+					inventory[i].amount += amount;
+					return false;
+				}
+				else {
+					displayInventory();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	function displayInventory() {
+		var i, node;
+		for(i = 0; i < inventoryContainer.children.length; i++) {
+			node = inventoryContainer.children[i];
+			node.onmouseover = "";
+			node.onmouseout = "";
+		}
+		
+		inventoryContainer.innerHTML = "";
+		
+		for(i = 0; i < inventory.length; i++) {
+			node = document.createElement("a");
+			node.innerHTML = inventory[i].displayName + " " + inventory[i].amount + "<br>";
+			
+			node.onmouseover = (function(a) {
+				return function() {
+					inventoryInfobox.innerHTML = "<span>" + a + "</span>";
+				}
+			})(inventory[i].description);
+			
+			node.onmouseout = function() {
+				inventoryInfobox.innerHTML = "";
+			}
+			
+			inventoryContainer.appendChild(node);
 		}
 	}
 	
@@ -93,73 +211,17 @@ function Logic() {
 		var visited = pages[pageNext].visited;
 		var i, j;
 		
+		applyFlags(page);
+		
 		var nodes = page.getElementsByTagName("*");
+		
 		for(i = 0; i < nodes.length; i++) {
 			var node = nodes[i];
-			var targetPage = node.getAttribute("data-goto");
-			if(targetPage) {
-				targetPage = parseInt(targetPage);
-				var sendArgs = {};
-				var argId = node.getAttribute("data-goto-arg-id");
-				if(argId) {
-					sendArgs.id = argId;
-				}
-				node.onclick = (function(a, b, c) {
-					return function() {
-						servePage(a, b, c);
-					}
-				})(targetPage, pageNext, sendArgs);
-			}
 			
-			var showIfId = node.getAttribute("data-showif-arg-id");
-			var showIfNotId = node.getAttribute("data-showif-arg-notid");
-			var visible = true;
-			if(args) {
-				if(showIfId !== null && args.id != showIfId)
-					visible = false;
-				
-				if(showIfNotId !== null && args.id == showIfNotId)
-					visible = false;
-			}
-			
-			var checkVisited = function(attribute, falseIfVisited) {
-				attribute = JSON.parse(attribute);
-				
-				if(attribute instanceof Array) {
-					var arr = [];
-					var i;
-					for(i = 0; i < attribute.length; i++) {
-						if(falseIfVisited ? pages[attribute[i]].visited : !pages[attribute[i]].visited)
-							arr.push(false);
-						else
-							arr.push(true);
-					}
-					for(i = 0; i < arr.length; i++) {
-						if(!arr[i])
-							return false;
-					}
-					return true;
-				}
-				else {
-					if(falseIfVisited ? pages[attribute].visited : !pages[attribute].visited)
-						return false;
-				}
-				return true;
-			}
-			
-			var showIfNotVisited = node.getAttribute("data-showif-arg-notvisited");
-			if(showIfNotVisited !== null)
-				visible = checkVisited(showIfNotVisited, true);
-			var showIfVisited = node.getAttribute("data-showif-arg-visited");
-			if(showIfVisited !== null)
-				visible = checkVisited(showIfVisited, false);
-			
-			if(!visible)
-				node.style.display = "none";
-			
-			var gameOver = node.getAttribute("data-gameover");
-			if(gameOver !== null)
-				node.onclick = restart;
+			parseNodeTargetPage(node, pageNext);
+			parseNodeVisibility(node, args ? args.id : null);
+			parseNodeTargetAddToInventory(node);
+			parseNodeTargetRestart(node);
 		}
 		
 		pageContainer.innerHTML = "";
@@ -168,14 +230,166 @@ function Logic() {
 		return true;
 	}
 	
+	function applyFlags(page) {
+		var resetVisited = getSpecialAttribute(page, "page-flag-resetvisited");
+		
+		if(resetVisited !== null) {
+			if(resetVisited instanceof Array) {
+				for(var i = 0; i < resetVisited.length; i++) {
+					pages[resetVisited[i]].visited = 0;
+				}
+			}
+			else {
+				pages[resetVisited].visited = 0;
+			}
+		}
+		
+		addItemToInventoryFromNode(page);
+	}
+	
+	function parseNodeTargetRestart(node) {
+		var gameOver = getSpecialAttribute(node, "gameover");
+		if(gameOver !== null) {
+			var f = function() {
+				restart();
+				node.removeEventListener("click", f);
+			}
+			
+			node.addEventListener("click", f);
+		}
+	}
+	
+	function parseNodeTargetPage(node, currentPage) {
+		var targetPage = getSpecialAttribute(node, "goto");
+		
+		if(targetPage === null)
+			return;
+		
+		var sendArgs = {};
+		var argId = getSpecialAttribute(node, "goto-arg-id");
+		if(argId !== null) {
+			sendArgs.id = argId;
+		}
+		
+		var f = function() {
+			servePage(targetPage, currentPage, sendArgs);
+			node.removeEventListener("click", f);
+		}
+		
+		node.addEventListener("click", f);
+	}
+	
+	function parseNodeTargetAddToInventory(node) {
+		var f = function() {
+			if(addItemToInventoryFromNode(node)) {
+				node.className += " item-retrieved";
+			}
+			node.removeEventListener("click", f);
+		}
+		node.addEventListener("click", f);
+	}
+	
+	function parseNodeVisibility(node, id) {
+		var isVisibleArr = [];
+		
+		isVisibleArr.push(getVisibleIfId(node, id));
+		isVisibleArr.push(getVisibleIfVisited(node));
+		
+		var isVisible = (function() {
+			for(var i = 0; i < isVisibleArr.length; i++) {
+				if(!isVisibleArr[i]) {
+					return false;
+				}
+			}
+			return true;
+		})();
+		
+		if(!isVisible)
+			node.style.display = "none";
+	}
+	
+	function getVisibleIfId(node, id) {
+		var showIfId = getSpecialAttribute(node, "showif-arg-id");
+		var showIfNotId = getSpecialAttribute(node, "showif-arg-notid");
+		
+		var isShowIfId = true;
+		var isShowIfNotId = true;
+		
+		if(showIfId !== null && id != showIfId)
+			isShowIfId = false;
+		if(showIfNotId !== null && id == showIfNotId)
+			isShowIfNotId = false;
+		
+		return isShowIfId && isShowIfNotId;
+	}
+	
+	function getVisibleIfVisited(node) {
+		var showIfVisited = getSpecialAttribute(node, "showif-arg-visited");
+		var showIfNotVisited = getSpecialAttribute(node, "showif-arg-notvisited");
+		
+		var showIfVisitedTimes = getSpecialAttribute(node, "showif-arg-visited-times");
+		var showIfNotVisitedTimes = getSpecialAttribute(node, "showif-arg-notvisited-times");
+		
+		var isShowIfVisited = true;
+		var isShowIfNotVisited = true;
+		
+		var getVisited = function(attribPage, attribTimes, falseIfVisited) {
+			if(attribPage instanceof Array) {
+				var arr = [];
+				var i;
+				for(i = 0; i < attribPage.length; i++) {
+					if(falseIfVisited ? (pages[attribPage[i]].visited >= attribTimes) : (pages[attribPage[i]].visited < attribTimes))
+						arr.push(false);
+					else
+						arr.push(true);
+				}
+				for(i = 0; i < arr.length; i++) {
+					if(!arr[i])
+						return false;
+				}
+				return true;
+			}
+			else {
+				if(falseIfVisited ? (pages[attribPage].visited >= attribTimes) : (pages[attribPage].visited < attribTimes))
+					return false;
+			}
+			return true;
+		}
+		
+		if(showIfVisited !== null)
+			isShowIfVisited = getVisited(showIfVisited, showIfVisitedTimes === null ? 1 : showIfVisitedTimes, false);
+		if(showIfNotVisited !== null)
+			isShowIfNotVisited = getVisited(showIfNotVisited, showIfNotVisitedTimes === null ? 1 : showIfNotVisitedTimes, true);
+		
+		return isShowIfVisited && isShowIfNotVisited;
+	}
+	
 	function restart() {
 		resetVisited();
+		clearInventory();
 		servePage(1, null, null);
+	}
+	
+	function getSpecialAttribute(node, attribute) {
+		var value = node.getAttribute("data-" + attribute);
+		if(value === null)
+			return null;
+		
+		value.replace("'", '"');
+		
+		try {
+			return JSON.parse(value);
+		}
+		catch(e) {
+			return value;
+		}
 	}
 	
 	return {
 		initialize : initialize,
 		servePage : servePage,
+		addItemToInventory : addItemToInventory,
+		removeItemFromInventory : removeItemFromInventory,
 		restart : restart
 	}
 }
