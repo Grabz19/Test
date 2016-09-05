@@ -15,13 +15,13 @@
 	data-goto - Number. Makes the element clickable and leads to the selected page.
 	data-goto-arg-id - Number. Only works if the element also has data-goto. Sends an id to the target page.
 	
-	data-showif-arg-id - Number. Makes the element visible only if the specified id was sent.
-	data-showif-arg-notid - Number. Makes the element visible only if the specified id was not sent.
+	data-showif-arg-id - Number or Array of Number. Makes the element visible only if the specified id or one of the specified ids was sent.
+	data-showif-arg-notid - Number or Array of Number. Makes the element visible only if the specified id or one of the specified ids was not sent.
 	
 	data-showif-visited - Number or Array of Number. Makes the element visible if the specified page or pages were visited at least once.
-	data-showif-visited-times - Number. Only works if the element also has data-showif-visited. Specifies the number of times the specified page has to have been visited for the element to be visible.
+	data-showif-visited-times - Number or Array of Number. Only works if the element also has data-showif-visited. Specifies the number of times the specified page has to have been visited for the element to be visible.
 	data-showif-notvisited - Number or Array of Number. Makes the element visible if the specified page has never been visited.
-	data-showif-notvisited-times - Number. Only works if the element also has data-showif-notvisited. Specifies the number of times the specified page has to have been visited for the element to be invisible.
+	data-showif-notvisited-times - Number or Array of Number. Only works if the element also has data-showif-notvisited. Specifies the number of times the specified page has to have been visited for the element to be invisible.
 	
 	data-showif-hasitem - String or Array of String. Makes the element visible if the player has the specified item.
 	data-showif-hasitem-amount - Number or Array of Number. Only works if the element also has data-showif-hasitem. Specifies the amount of the item required for the element to be visible. This is optional, and is 1 by default.
@@ -311,8 +311,7 @@
 	
 	<p data-showif-arg-id="0">You look in the closet. Work clothes, sleep clothes, shoes. Nothing out of the ordinary.</p>
 	
-	<p data-showif-arg-id="3">You walk towards the window. It's visibly bright outside.<span data-showif-visited="3"> You can see the house where Jeremy lives, but no sign of him.</span></p>
-	<p data-showif-arg-id="5">You walk towards the window. It's visibly bright outside.<span data-showif-visited="3"> You can see the house where Jeremy lives, but no sign of him.</span></p>
+	<p data-showif-arg-id="[3,5]">You walk towards the window. It's visibly bright outside.<span data-showif-visited="3"> You can see the house where Jeremy lives, but no sign of him.</span></p>
 	
 	<p>You should probably go and make some breakfast.</p>
 	

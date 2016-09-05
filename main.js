@@ -404,10 +404,33 @@ function Logic() {
 		var isShowIfId = true;
 		var isShowIfNotId = true;
 		
-		if(showIfId !== null && id != showIfId)
-			isShowIfId = false;
-		if(showIfNotId !== null && id == showIfNotId)
-			isShowIfNotId = false;
+		var getId = function(attribPage, falseIfId) {
+			if(attribPage instanceof Array) {
+				var arr = [];
+				var i;
+				for(i = 0; i < attribPage.length; i++) {
+					if(falseIfId ? id == attribPage[i] : id != attribPage[i])
+						arr.push(false);
+					else
+						arr.push(true);
+				}
+				for(i = 0; i < arr.length; i++) {
+					if(arr[i])
+						return true;
+				}
+				return false;
+			}
+			else {
+				if(falseIfId ? id == attribPage : id != attribPage)
+					return false;
+			}
+			return true;
+		}
+		
+		if(showIfId !== null)
+			isShowIfId = getId(showIfId, false);
+		if(showIfNotId !== null)
+			isShowIfNotId = getId(showIfNotId, true);
 		
 		return isShowIfId && isShowIfNotId;
 	}
@@ -427,7 +450,7 @@ function Logic() {
 				var arr = [];
 				var i;
 				for(i = 0; i < attribPage.length; i++) {
-					if(falseIfVisited ? (pages[attribPage[i]].visited >= attribTimes) : (pages[attribPage[i]].visited < attribTimes))
+					if(falseIfVisited ? (pages[attribPage[i]].visited >= attribTimes[i]) : (pages[attribPage[i]].visited < attribTimes[i]))
 						arr.push(false);
 					else
 						arr.push(true);
