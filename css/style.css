@@ -1,0 +1,73 @@
+body {
+	background-color: black;
+	color: #dedede;
+	margin: 4px 4px 4px 4px;
+}
+
+input {
+	background-color: black;
+	border-color: gray;
+}
+
+.noselect {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.btn {
+	border-radius:0px;
+}
+
+.btn-default {
+	background-color: black;
+	border-color: gray;
+	color: #dedede;
+}
+
+.btn-default:hover {
+	background-color: #252525;
+	border-color: gray;
+	color: #dedede;
+}
+
+.btn-default.active,
+.btn-default.active.focus,
+.btn-default.active:focus,
+.btn-default.active:hover,
+.btn-default:active,
+.btn-default:active.focus,
+.btn-default:active:focus,
+.btn-default:active:hover {
+	background-color: #3d3d3d;
+	border-color: gray;
+	color: #dedede;
+}
+
+.progress {
+    width: 100%;
+    position: relative;
+    background-color: #3d3d3d;
+	border-radius: 0px;
+}
+
+.progress-bar {
+    width: 100%;
+    position: absolute;
+    -webkit-transition-duration: 0s;
+    transition-duration: 0s;
+	background-color: #810fb1;
+}
+
+.progress-text {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+}
+
+.container-page {
+	width: 30%;
+}
