@@ -43,7 +43,7 @@
 -->
 
 <div data-page="1">
-	<span data-item="cellphone" data-item-amount="1" data-item-name="Cellphone" data-item-description="Your cellphone."></span>
+	<span data-item="cellphone" data-item-name="Cellphone" data-item-description="Your cellphone."></span>
 	<p>You regain consciousness as you hear the buzzing sound of a familiar alarm clock.</p>
 
 	<p>It's 6:00 AM.</p>
@@ -62,6 +62,7 @@
 	<a data-goto="5"><br>Look through the window again.</a>
 	<a data-goto="2"><br>Look under your bed.</a>
 	<a data-goto="6"><br>Climb out of the window.</a>
+	<a data-goto="15"><br>Take your gun from the desk.</a>
 </div>
 
 <div data-page="2">
@@ -77,6 +78,7 @@
 	<a data-goto="4" data-showif-visited="7"><br>Go back to bed.</a>
 	<a data-goto="5" data-showif-notvisited="5"><br>Look through the window again.</a>
 	<a data-goto="6" data-showif-notvisited="6"><br>Climb out of the window.</a>
+	<a data-goto="15" data-showif-notvisited="15"><br>Take your gun from the desk.</a>
 </div>
 
 <div data-page="3">
@@ -96,6 +98,7 @@
 	<a data-goto="5" data-showif-notvisited="5"><br>Look through the window again.</a>
 	<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
 	<a data-goto="6" data-showif-notvisited="6"><br>Climb out of the window.</a>
+	<a data-goto="15" data-showif-notvisited="15"><br>Take your gun from the desk.</a>
 </div>
 
 <div data-page="4">
@@ -132,6 +135,7 @@
 	<a data-goto="9"><br>Turn right and walk out of the room.</a>
 	<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
 	<a data-goto="6" data-showif-notvisited="6"><br>Climb out of the window.</a>
+	<a data-goto="15" data-showif-notvisited="15"><br>Take your gun from the desk.</a>
 </div>
 
 <div data-page="6">
@@ -161,6 +165,7 @@
 	<a data-goto="9"><br>Turn right and walk out of the room.</a>
 	<a data-goto="4" data-showif-notvisited="4"><br>Go back to bed.</a>
 	<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
+	<a data-goto="15" data-showif-notvisited="15"><br>Take your gun from the desk.</a>
 </div>
 
 <div data-page="8">
@@ -194,6 +199,7 @@
 	
 	<a data-goto="11"><br>Check the closet<span data-showif-visited="3"> again</span>.</a>
 	<a data-goto="10"><br>Look under the bed<span data-showif-visited="2"> again</span>.</a>
+	<a data-showif-nothasitem="gun" data-goto="15" data-goto-arg-id="0"><br>Take your gun from the desk.</a>
 </div>
 
 <div data-page="10">
@@ -208,6 +214,7 @@
 	<p>Nothing. Just a bunch of dust.</p>
 	
 	<a data-goto="11"><br>Check the closet<span data-showif-visited="3"> again</span>.</a>
+	<a data-showif-nothasitem="gun" data-goto="15" data-goto-arg-id="0"><br>Take your gun from the desk.</a>
 </div>
 
 <div data-page="11">
@@ -314,4 +321,23 @@
 
 <div data-page="14">
 	<a data-gameover="-"><br>Start over.</a>
+</div>
+
+<div data-page="15">
+	<p>You feel like the whole situation seems quite unusual. Better safe than sorry.</p>
+	
+	<p data-item="gun" data-item-name="Colt 1911" data-item-description="Old fashioned, but does the job.">You take your gun from the shelf.</p>
+	
+	<div data-showif-arg-notid="0">
+		<a data-goto="3" data-showif-notvisited="3"><br>Open the closet.</a>
+		<a data-goto="2" data-goto-arg-id="0" data-showif-notvisited="2"><br>Look around for clues.</a>
+		<a data-goto="9"><br>Turn right and walk out of the room.</a>
+		<a data-goto="5" data-showif-notvisited="5"><br>Look through the window again.</a>
+		<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
+		<a data-goto="6" data-showif-notvisited="6"><br>Climb out of the window.</a>
+	</div>
+	<div data-showif-arg-id="0">
+		<a data-goto="11" data-showif-notvisited="11"><br>Check the closet<span data-showif-visited="3"> again</span>.</a>
+		<a data-goto="10" data-showif-notvisited="10"><br>Look under the bed<span data-showif-visited="2"> again</span>.</a>
+	</div>
 </div>
