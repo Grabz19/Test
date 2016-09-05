@@ -18,6 +18,19 @@ input {
 	user-select: none;
 }
 
+.container-fluid {
+	padding: 0;
+}
+
+.infobox {
+	width: 100%;
+	min-height: 62px;
+	border: 1px #dedede solid;
+	padding-left: 3px;
+	padding-right: 3px;
+	text-align: center;
+}
+
 .btn {
 	border-radius:0px;
 }

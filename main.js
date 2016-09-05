@@ -57,7 +57,9 @@ function Page(node, visited) {
 }
 
 function Logic() {
-	var pageContainer = document.getElementById('page');
+	var pageContainer = document.getElementById('page_container');
+	var inventoryContainer = document.getElementById('inventory_container');
+	var inventoryInfobox = document.getElementById('inventory_infobox');
 	
 	var pages = null;
 	
@@ -93,73 +95,16 @@ function Logic() {
 		var visited = pages[pageNext].visited;
 		var i, j;
 		
+		applyFlags(page);
+		
 		var nodes = page.getElementsByTagName("*");
+		
 		for(i = 0; i < nodes.length; i++) {
 			var node = nodes[i];
-			var targetPage = node.getAttribute("data-goto");
-			if(targetPage) {
-				targetPage = parseInt(targetPage);
-				var sendArgs = {};
-				var argId = node.getAttribute("data-goto-arg-id");
-				if(argId) {
-					sendArgs.id = argId;
-				}
-				node.onclick = (function(a, b, c) {
-					return function() {
-						servePage(a, b, c);
-					}
-				})(targetPage, pageNext, sendArgs);
-			}
 			
-			var showIfId = node.getAttribute("data-showif-arg-id");
-			var showIfNotId = node.getAttribute("data-showif-arg-notid");
-			var visible = true;
-			if(args) {
-				if(showIfId !== null && args.id != showIfId)
-					visible = false;
-				
-				if(showIfNotId !== null && args.id == showIfNotId)
-					visible = false;
-			}
-			
-			var checkVisited = function(attribute, falseIfVisited) {
-				attribute = JSON.parse(attribute);
-				
-				if(attribute instanceof Array) {
-					var arr = [];
-					var i;
-					for(i = 0; i < attribute.length; i++) {
-						if(falseIfVisited ? pages[attribute[i]].visited : !pages[attribute[i]].visited)
-							arr.push(false);
-						else
-							arr.push(true);
-					}
-					for(i = 0; i < arr.length; i++) {
-						if(!arr[i])
-							return false;
-					}
-					return true;
-				}
-				else {
-					if(falseIfVisited ? pages[attribute].visited : !pages[attribute].visited)
-						return false;
-				}
-				return true;
-			}
-			
-			var showIfNotVisited = node.getAttribute("data-showif-arg-notvisited");
-			if(showIfNotVisited !== null)
-				visible = checkVisited(showIfNotVisited, true);
-			var showIfVisited = node.getAttribute("data-showif-arg-visited");
-			if(showIfVisited !== null)
-				visible = checkVisited(showIfVisited, false);
-			
-			if(!visible)
-				node.style.display = "none";
-			
-			var gameOver = node.getAttribute("data-gameover");
-			if(gameOver !== null)
-				node.onclick = restart;
+			parseNodeTargetPage(node, pageNext);
+			parseNodeVisibility(node, args ? args.id : null);
+			parseNodeTargetRestart(node);
 		}
 		
 		pageContainer.innerHTML = "";
@@ -168,9 +113,132 @@ function Logic() {
 		return true;
 	}
 	
+	function applyFlags(page) {
+		var resetVisited = getSpecialAttribute(page, "page-flag-resetvisited");
+		
+		if(resetVisited === null)
+			return false;
+		else {
+			
+			if(resetVisited instanceof Array) {
+				for(var i = 0; i < resetVisited.length; i++) {
+					pages[resetVisited[i]].visited = 0;
+				}
+			}
+			else {
+				pages[resetVisited].visited = 0;
+			}
+			return true;
+		}
+	}
+	
+	function parseNodeTargetRestart(node) {
+		var gameOver = getSpecialAttribute(node, "gameover");
+		if(gameOver !== null)
+			node.onclick = restart;
+	}
+	
+	function parseNodeTargetPage(node, currentPage) {
+		var targetPage = getSpecialAttribute(node, "goto");
+		
+		if(targetPage === null)
+			return;
+		
+		var sendArgs = {};
+		var argId = getSpecialAttribute(node, "goto-arg-id");
+		if(argId !== null) {
+			sendArgs.id = argId;
+		}
+		
+		node.onclick = (function(a, b, c) {
+			return function() {
+				servePage(a, b, c);
+			}
+		})(targetPage, currentPage, sendArgs);
+	}
+	
+	function parseNodeVisibility(node, id) {
+		var isVisibleArr = [];
+		
+		isVisibleArr.push(getVisibleIfId(node, id));
+		isVisibleArr.push(getVisibleIfVisited(node));
+		
+		var isVisible = (function() {
+			for(var i = 0; i < isVisibleArr.length; i++) {
+				if(!isVisibleArr[i]) {
+					return false;
+				}
+			}
+			return true;
+		})();
+		
+		if(!isVisible)
+			node.style.display = "none";
+	}
+	
+	function getVisibleIfId(node, id) {
+		var showIfId = getSpecialAttribute(node, "showif-arg-id");
+		var showIfNotId = getSpecialAttribute(node, "showif-arg-notid");
+		
+		var isShowIfId = true;
+		var isShowIfNotId = true;
+		
+		if(showIfId !== null && id != showIfId)
+			isShowIfId = false;
+		if(showIfNotId !== null && id == showIfNotId)
+			isShowIfNotId = false;
+		
+		return isShowIfId && isShowIfNotId;
+	}
+	
+	function getVisibleIfVisited(node) {
+		var showIfVisited = getSpecialAttribute(node, "showif-arg-visited");
+		var showIfNotVisited = getSpecialAttribute(node, "showif-arg-notvisited");
+		
+		var showIfVisitedTimes = getSpecialAttribute(node, "showif-arg-visited-times");
+		var showIfNotVisitedTimes = getSpecialAttribute(node, "showif-arg-notvisited-times");
+		
+		var isShowIfVisited = true;
+		var isShowIfNotVisited = true;
+		
+		var getVisited = function(attribPage, attribTimes, falseIfVisited) {
+			if(attribPage instanceof Array) {
+				var arr = [];
+				var i;
+				for(i = 0; i < attribPage.length; i++) {
+					if(falseIfVisited ? (pages[attribPage[i]].visited >= attribTimes) : (pages[attribPage[i]].visited < attribTimes))
+						arr.push(false);
+					else
+						arr.push(true);
+				}
+				for(i = 0; i < arr.length; i++) {
+					if(!arr[i])
+						return false;
+				}
+				return true;
+			}
+			else {
+				if(falseIfVisited ? (pages[attribPage].visited >= attribTimes) : (pages[attribPage].visited < attribTimes))
+					return false;
+			}
+			return true;
+		}
+		
+		if(showIfVisited !== null)
+			isShowIfVisited = getVisited(showIfVisited, showIfVisitedTimes === null ? 1 : showIfVisitedTimes, false);
+		if(showIfNotVisited !== null)
+			isShowIfNotVisited = getVisited(showIfNotVisited, showIfNotVisitedTimes === null ? 1 : showIfNotVisitedTimes, true);
+		
+		return isShowIfVisited && isShowIfNotVisited;
+	}
+	
 	function restart() {
 		resetVisited();
 		servePage(1, null, null);
+	}
+	
+	function getSpecialAttribute(node, attribute) {
+		return JSON.parse(node.getAttribute("data-" + attribute));
 	}
 	
 	return {
