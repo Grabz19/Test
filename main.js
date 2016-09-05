@@ -98,8 +98,9 @@ function Logic() {
 			var i;
 			for(i = 0; i < inventory.length; i++) {
 				if(inventoryItem.name == inventory[i].name) {
-					if(inventoryItem.amount === null)
-						inventory[i].amount++;
+					if(inventoryItem.amount === null || inventoryItem.amount <= 0) {
+
+					}
 					else
 						inventory[i].amount += inventoryItem.amount;
 					
@@ -112,30 +113,11 @@ function Logic() {
 					return true;
 				}
 			}
+			if(inventoryItem.amount === null || inventoryItem.amount <= 0)
+				return false;
+			
 			inventory.push(inventoryItem);
 			displayInventory();
-			return true;
-		}
-		return false;
-	}
-	
-	function addItemToInventoryFromNode(node) {
-		var item = getSpecialAttribute(node, "item");
-		
-		if(item !== null) {
-			var itemAmount = getSpecialAttribute(node, "item-amount");
-			var itemName = getSpecialAttribute(node, "item-name");
-			var itemDescription = getSpecialAttribute(node, "item-description");
-			var itemDescriptionOverride = getSpecialAttribute(node, "item-description-override");
-			
-			var inventoryItem = new InventoryItem(
-				item,
-				itemAmount === null ? 1 : itemAmount,
-				itemName,
-				itemDescription
-			);
-			
-			addItemToInventory(inventoryItem, itemDescriptionOverride === null ? false : itemDescriptionOverride);
 			return true;
 		}
 		return false;
@@ -165,6 +147,15 @@ function Logic() {
 		return false;
 	}
 	
+	function getInventoryContainsItem(name, amount) {
+		var i;
+		for(i = 0; i < inventory.length; i++) {
+			if(inventory[i].name == name && inventory[i].amount >= amount)
+				return true;
+		}
+		return false;
+	}
+	
 	function displayInventory() {
 		var i, node;
 		for(i = 0; i < inventoryContainer.children.length; i++) {
@@ -177,7 +168,7 @@ function Logic() {
 		
 		for(i = 0; i < inventory.length; i++) {
 			node = document.createElement("a");
-			node.innerHTML = inventory[i].displayName + " " + inventory[i].amount + "<br>";
+			node.innerHTML = inventory[i].displayName + (inventory[i].amount > 1 ? " " + inventory[i].amount : "") + "<br>";
 			
 			node.onmouseover = (function(a) {
 				return function() {
@@ -209,20 +200,27 @@ function Logic() {
 		
 		var page = pages[pageNext].node.cloneNode(true);
 		var visited = pages[pageNext].visited;
-		var i, j;
 		
 		applyFlags(page);
 		
-		var nodes = page.getElementsByTagName("*");
-		
-		for(i = 0; i < nodes.length; i++) {
-			var node = nodes[i];
-			
-			parseNodeTargetPage(node, pageNext);
-			parseNodeVisibility(node, args ? args.id : null);
-			parseNodeTargetAddToInventory(node);
-			parseNodeTargetRestart(node);
+		var iterator = function(parent) {
+			var i;
+			for(i = 0; i < parent.children.length; i++) {
+				var child = parent.children[i];
+				
+				parseNodeVisibility(child, args ? args.id : null);
+				
+				if(child.style.display != "none") {
+					parseNodeTargetPage(child, pageNext);
+					parseNodeTargetAddToInventory(child);
+					parseNodeTargetRestart(child);
+					
+					iterator(child);
+				}
+			}
 		}
+		
+		iterator(page);
 		
 		pageContainer.innerHTML = "";
 		pageContainer.appendChild(page);
@@ -243,8 +241,6 @@ function Logic() {
 				pages[resetVisited].visited = 0;
 			}
 		}
-		
-		addItemToInventoryFromNode(page);
 	}
 	
 	function parseNodeTargetRestart(node) {
@@ -279,14 +275,85 @@ function Logic() {
 		node.addEventListener("click", f);
 	}
 	
-	function parseNodeTargetAddToInventory(node) {
-		var f = function() {
-			if(addItemToInventoryFromNode(node)) {
-				node.className += " item-retrieved";
-			}
-			node.removeEventListener("click", f);
+	function addItemToInventoryFromNode(node) {
+		var item = getSpecialAttribute(node, "item");
+		
+		if(item !== null) {
+			var itemAmount = getSpecialAttribute(node, "item-amount");
+			var itemName = getSpecialAttribute(node, "item-name");
+			var itemDescription = getSpecialAttribute(node, "item-description");
+			var itemDescriptionOverride = getSpecialAttribute(node, "item-description-override");
+			
+			var inventoryItem = new InventoryItem(
+				item,
+				itemAmount,
+				itemName,
+				itemDescription
+			);
+			
+			addItemToInventory(inventoryItem, itemDescriptionOverride === null ? false : itemDescriptionOverride);
+			return true;
 		}
-		node.addEventListener("click", f);
+		return false;
+	}
+	
+	function parseNodeTargetAddToInventory(node) { //TODO this is all sorts of fucked up
+		var item = getSpecialAttribute(node, "item");
+		if(item === null)
+			return;
+		
+		var itemAmount = getSpecialAttribute(node, "item-amount");
+		var itemName = getSpecialAttribute(node, "item-name");
+		var itemDescription = getSpecialAttribute(node, "item-description");
+		var itemDescriptionOverride = getSpecialAttribute(node, "item-description-override");
+		var itemAction = getSpecialAttribute(node, "item-action");
+
+		var f = function(item, itemAmount, itemName, itemDescription, itemDescriptionOverride, itemAction) {
+			if(itemAction == "remove") {
+				removeItemFromInventory(item, ((itemAmount === null || itemAmount <= 0) ? 1 : itemAmount));
+			}
+			else if(itemAction == "add" || itemAction == "modify") {
+				var inventoryItem = new InventoryItem(
+					item,
+					itemAction == "modify" ? 0 : (itemAmount <= 0 ? 1 : itemAmount),
+					itemName,
+					itemDescription
+				);
+				
+				addItemToInventory(inventoryItem, itemDescriptionOverride);
+			}
+		}
+		
+		var addItems = function(item, itemAmount, itemName, itemDescription, itemDescriptionOverride) {
+			if(item instanceof Array) {
+				for(var i = 0; i < item.length; i++) {
+					f(item[i], itemAmount[i], itemName[i], itemDescription[i], itemDescriptionOverride === null ? false : itemDescriptionOverride[i], itemAction === null ? "add" : itemAction[i]);
+				}
+			}
+			else {
+				f(item, itemAmount, itemName, itemDescription, itemDescriptionOverride === null ? false : itemDescriptionOverride, itemAction === null ? "add" : itemAction);
+			}
+		}
+		
+		
+		var eventType = getSpecialAttribute(node, "item-eventtype");
+		
+		if(eventType === null || eventType == "auto") {
+			addItems(item, itemAmount, itemName, itemDescription, itemDescriptionOverride);
+		}
+		else if(eventType == "click") {
+			var f2 = (function(a, b, c, d, e, f, g) {
+				var handler = function() {
+					a(b, c, d, e, f, g);
+
+					node.className += " item-retrieved";
+					node.removeEventListener("click", handler);
+				}
+				return handler;
+			})(addItems, item, itemAmount, itemName, itemDescription, itemDescriptionOverride, itemAction);
+			
+			node.addEventListener("click", f2);
+		}
 	}
 	
 	function parseNodeVisibility(node, id) {
@@ -294,6 +361,7 @@ function Logic() {
 		
 		isVisibleArr.push(getVisibleIfId(node, id));
 		isVisibleArr.push(getVisibleIfVisited(node));
+		isVisibleArr.push(getVisibleIfHasItem(node));
 		
 		var isVisible = (function() {
 			for(var i = 0; i < isVisibleArr.length; i++) {
@@ -306,6 +374,27 @@ function Logic() {
 		
 		if(!isVisible)
 			node.style.display = "none";
+		
+	}
+	
+	function getVisibleIfHasItem(node) {
+		var showIfHasItem = getSpecialAttribute(node, "showif-hasitem");
+		var showIfNotHasItem = getSpecialAttribute(node, "showif-nothasitem");
+
+		var isShowIfHasItem = true;
+		var isShowIfNotHasItem = true;
+		
+		if(showIfHasItem !== null) {
+			var showIfHasItemAmount = getSpecialAttribute(node, "showif-hasitem-amount");
+			isShowIfHasItem = getInventoryContainsItem(showIfHasItem, showIfHasItemAmount === null ? 1 : showIfHasItemAmount);
+		}
+		if(showIfNotHasItem !== null) {
+			var showIfNotHasItemAmount = getSpecialAttribute(node, "showif-nothasitem-amount");
+			isShowIfNotHasItem = getInventoryContainsItem(showIfNotHasItem, showIfNotHasItemAmount === null ? 1 : showIfNotHasItemAmount);
+			isShowIfNotHasItem = !isShowIfNotHasItem;
+		}
+		
+		return isShowIfHasItem && isShowIfNotHasItem;
 	}
 	
 	function getVisibleIfId(node, id) {
@@ -324,11 +413,11 @@ function Logic() {
 	}
 	
 	function getVisibleIfVisited(node) {
-		var showIfVisited = getSpecialAttribute(node, "showif-arg-visited");
-		var showIfNotVisited = getSpecialAttribute(node, "showif-arg-notvisited");
+		var showIfVisited = getSpecialAttribute(node, "showif-visited");
+		var showIfNotVisited = getSpecialAttribute(node, "showif-notvisited");
 		
-		var showIfVisitedTimes = getSpecialAttribute(node, "showif-arg-visited-times");
-		var showIfNotVisitedTimes = getSpecialAttribute(node, "showif-arg-notvisited-times");
+		var showIfVisitedTimes = getSpecialAttribute(node, "showif-visited-times");
+		var showIfNotVisitedTimes = getSpecialAttribute(node, "showif-notvisited-times");
 		
 		var isShowIfVisited = true;
 		var isShowIfNotVisited = true;
@@ -375,7 +464,7 @@ function Logic() {
 		if(value === null)
 			return null;
 		
-		value.replace("'", '"');
+		console.log(value);
 		
 		try {
 			return JSON.parse(value);

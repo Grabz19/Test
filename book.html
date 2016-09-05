@@ -4,35 +4,46 @@
 	data-page - Number. Used in the root elements only, to mark separate pages.
 	data-page-flag-resetvisited - Number or Array of Number. Only works if the element also has data-page. Resets the visit counter on specified page or pages to zero before this page is loaded.
 	
-	data-item - String or Array of String. This makes the element clickable, which in turn adds the item or items of the specified names to the inventory. Can be used as page attribute, which automatically adds the item to the inventory when the page is loaded.
-	data-item-amount - Number or Array of Number. Only works if the element also has data-item. Specifies the number of items or uses to give this item. If this isn't specified, the item receives 1 use.
+	data-item - String or Array of String. This makes the element clickable, which in turn adds the item or items of the specified names to the inventory.
+	data-item-action - String or Array of String. Supports three states - "add", "remove" or "modify". "add" by default.
+	data-item-amount - Number or Array of Number. Only works if the element also has data-item. Specifies the number of items or uses to give this item. For action "add", this is 1 by default.
 	data-item-name - String or Array of String. Only works if the element also has data-item. Specifies the display name for the item or items.
 	data-item-description - String or Array of String. Only works if the element also has data-item. Specifies the display description for the item.
 	data-item-description-override - Boolean. Only works if the element also has data-item-description. If true, if player already has this item, it will receive the specified description. If false, the specified description will be ignored. Defaults to false.
+	data-item-eventtype - String. Can be either "auto" or "click". "auto" makes the player receive the item automatically. "click" requires the player to click on the node. Optional. Defaults to "auto".
 	
 	data-goto - Number. Makes the element clickable and leads to the selected page.
 	data-goto-arg-id - Number. Only works if the element also has data-goto. Sends an id to the target page.
 	
 	data-showif-arg-id - Number. Makes the element visible only if the specified id was sent.
 	data-showif-arg-notid - Number. Makes the element visible only if the specified id was not sent.
-	data-showif-arg-visited - Number or Array of Number. Makes the element visible if the specified page or pages were visited at least once.
-	data-showif-arg-visited-times - Number. Only works if the element also has data-showif-arg-visited. Specifies the number of times the specified page has to have been visited for the element to be visible.
-	data-showif-arg-notvisited - Number or Array of Number. Makes the element visible if the specified page has never been visited.
-	data-showif-arg-notvisited-times - Number. Only works if the element also has data-showif-arg-notvisited. Specifies the number of times the specified page has to have been visited for the element to be invisible.
+	
+	data-showif-visited - Number or Array of Number. Makes the element visible if the specified page or pages were visited at least once.
+	data-showif-visited-times - Number. Only works if the element also has data-showif-visited. Specifies the number of times the specified page has to have been visited for the element to be visible.
+	data-showif-notvisited - Number or Array of Number. Makes the element visible if the specified page has never been visited.
+	data-showif-notvisited-times - Number. Only works if the element also has data-showif-notvisited. Specifies the number of times the specified page has to have been visited for the element to be invisible.
+	
+	data-showif-hasitem - String or Array of String. Makes the element visible if the player has the specified item.
+	data-showif-hasitem-amount - Number or Array of Number. Only works if the element also has data-showif-hasitem. Specifies the amount of the item required for the element to be visible. This is optional, and is 1 by default.
+	data-showif-nothasitem - String or Array of String. Makes the element visible if the player does not have the specified item.
+	data-showif-nothasitem-amount - Number or Array of Number. Only works if the element also has data-showif-nothasitem. Specifies the amount of the item required for the element to be invisible. This is optional, and is 1 by default.
 	
 	data-gameover - String. Makes the element clickable which restarts the game.
 	
 	
 	EXAMPLES:
 	
-	<p data-showif-arg-visited="1">Show if visited 1 times.</p>
-	<p data-showif-arg-visited="1" data-showif-arg-visited-times="3">Show if visited 3 times.</p>
-	<p data-showif-arg-notvisited="1">Hide if visited 1 times.</p>
-	<p data-showif-arg-notvisited="1" data-showif-arg-notvisited-times="3">Hide if visited 3 times.</p>
-
+	<p data-showif-visited="1">Show if visited 1 times.</p>
+	<p data-showif-visited="1" data-showif-visited-times="3">Show if visited 3 times.</p>
+	<p data-showif-notvisited="1">Hide if visited 1 times.</p>
+	<p data-showif-notvisited="1" data-showif-notvisited-times="3">Hide if visited 3 times.</p>
+	
+	<a data-item="cellphone" data-item-amount="1" data-item-name="Cellphone" data-item-eventtype="click" data-item-description='A cellphone.'>Do you pick up the cellphone?</a>
+	<span data-item='["rock","stick"]' data-item-amount='[5,10]' data-item-name='["Rock","Stick"]' data-item-eventtype="auto" data-item-description='["Bunch of rocks branded \"Rock Bottom\". They&apos;re just rocks, actually.", "Will 10 sticks make a shack? I don&apos;t know, do you?"]'></span>
 -->
 
 <div data-page="1">
+	<span data-item="cellphone" data-item-amount="1" data-item-name="Cellphone" data-item-description="Your cellphone."></span>
 	<p>You regain consciousness as you hear the buzzing sound of a familiar alarm clock.</p>
 
 	<p>It's 6:00 AM.</p>
@@ -43,7 +54,7 @@
 
 	<p>You walk up to the window to your left and peek through the curtain. It's pitch black outside.</p>
 
-	<p>As you look, you spot an unfamiliar reflection in the window. You turn around quickly. There is a note on your closet. It reads "7RC9". The letters are inscribed with crayons, and the handwriting looks as if it was written by a child. <a data-item="starting_note" data-item-name="Note from the closet" data-item-description='A mysterious note you found on your bedroom closet. It reads "7RC9", written by a child with crayons.'>Do you keep the note?</p>
+	<p>As you look, you spot an unfamiliar reflection in the window. You turn around quickly. There is a note on your closet. It reads "7RC9". The letters are inscribed with crayons, and the handwriting looks as if it was written by a child. <a data-item="starting_note" data-item-amount="1" data-item-name="Note from the closet" data-item-eventtype="click" data-item-description='A mysterious note you found on your bedroom closet. It reads "7RC9", written by a child with crayons.'>Do you keep the note?</a></p>
 	
 	<a data-goto="3"><br>Open the closet.</a>
 	<a data-goto="2" data-goto-arg-id="0"><br>Look around for clues.</a>
@@ -61,11 +72,11 @@
 
 	<p>You stand up.</p>
 
-	<a data-goto="3" data-showif-arg-notvisited="3"><br>Open the closet.</a>
+	<a data-goto="3" data-showif-notvisited="3"><br>Open the closet.</a>
 	<a data-goto="9"><br>Turn around and walk out of the room.</a>
-	<a data-goto="4" data-showif-arg-visited="7"><br>Go back to bed.</a>
-	<a data-goto="5" data-showif-arg-notvisited="5"><br>Look through the window again.</a>
-	<a data-goto="6" data-showif-arg-notvisited="6"><br>Climb out of the window.</a>
+	<a data-goto="4" data-showif-visited="7"><br>Go back to bed.</a>
+	<a data-goto="5" data-showif-notvisited="5"><br>Look through the window again.</a>
+	<a data-goto="6" data-showif-notvisited="6"><br>Climb out of the window.</a>
 </div>
 
 <div data-page="3">
@@ -79,12 +90,12 @@
 	
 	<p>Nothing unusual whatsoever. Just your regular old clothes. Buzzkill.</p>
 
-	<a data-goto="2" data-goto-arg-id="0" data-showif-arg-notvisited="2"><br>Look around for clues.</a>
+	<a data-goto="2" data-goto-arg-id="0" data-showif-notvisited="2"><br>Look around for clues.</a>
 	<a data-goto="9"><br>Turn left and walk out of the room.</a>
-	<a data-goto="4" data-showif-arg-visited="7"><br>Go back to bed.</a>
-	<a data-goto="5" data-showif-arg-notvisited="5"><br>Look through the window again.</a>
-	<a data-goto="2" data-showif-arg-notvisited="2"><br>Look under your bed.</a>
-	<a data-goto="6" data-showif-arg-notvisited="6"><br>Climb out of the window.</a>
+	<a data-goto="4" data-showif-visited="7"><br>Go back to bed.</a>
+	<a data-goto="5" data-showif-notvisited="5"><br>Look through the window again.</a>
+	<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
+	<a data-goto="6" data-showif-notvisited="6"><br>Climb out of the window.</a>
 </div>
 
 <div data-page="4">
@@ -104,9 +115,9 @@
 </div>
 
 <div data-page="5">
-	<p data-showif-arg-visited="3">"That kid Jeremy... hang on a minute! If he tried to prank me, I bet he stuck around to see me get pranked! Ha! I should look out the window again, he might be on the run."</p>
+	<p data-showif-visited="3">"That kid Jeremy... hang on a minute! If he tried to prank me, I bet he stuck around to see me get pranked! Ha! I should look out the window again, he might be on the run."</p>
 	
-	<p data-showif-arg-notvisited="3">You feel like you should check outside the window again.</p>
+	<p data-showif-notvisited="3">You feel like you should check outside the window again.</p>
 	
 	<p>You have a peek out the window.</p>
 	
@@ -114,17 +125,17 @@
 	
 	<p>"Man... I know it's still early but... is it usually this dark at six?</p>
 	
-	<p data-showif-arg-visited="3">There is no sign of Jeremy. The darkness makes it impossible to see, anyway.</p>
+	<p data-showif-visited="3">There is no sign of Jeremy. The darkness makes it impossible to see, anyway.</p>
 
-	<a data-goto="3" data-showif-arg-notvisited="3"><br>Open the closet.</a>
-	<a data-goto="2" data-goto-arg-id="0" data-showif-arg-notvisited="2"><br>Look around for clues.</a>
+	<a data-goto="3" data-showif-notvisited="3"><br>Open the closet.</a>
+	<a data-goto="2" data-goto-arg-id="0" data-showif-notvisited="2"><br>Look around for clues.</a>
 	<a data-goto="9"><br>Turn right and walk out of the room.</a>
-	<a data-goto="2" data-showif-arg-notvisited="2"><br>Look under your bed.</a>
-	<a data-goto="6" data-showif-arg-notvisited="6"><br>Climb out of the window.</a>
+	<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
+	<a data-goto="6" data-showif-notvisited="6"><br>Climb out of the window.</a>
 </div>
 
 <div data-page="6">
-	<p data-showif-arg-visited="[3, 5]">"Man, that damn Jeremy. I'm sick of his antics. I'm going to get you Jeremy!"</p>
+	<p data-showif-visited="[3, 5]">"Man, that damn Jeremy. I'm sick of his antics. I'm going to get you Jeremy!"</p>
 	
 	<p>You begin making an effort to climb out of the window. You slide open the curtains and twist the handle. The window opens up easily.</p>
 	
@@ -141,23 +152,23 @@
 	
 	<p>"This is crazy. What am I even doing?" - you say - "I must have been possessed for a moment there."</p>
 	
-	<p data-showif-arg-notvisited="5">You decide to peek through the window to see if anyone outside spotted your crazy moves. You almost climbed out after all.</p>
+	<p data-showif-notvisited="5">You decide to peek through the window to see if anyone outside spotted your crazy moves. You almost climbed out after all.</p>
 	
-	<p data-showif-arg-notvisited="5">Complete darkness.</p>
+	<p data-showif-notvisited="5">Complete darkness.</p>
 	
-	<a data-goto="3" data-showif-arg-notvisited="3"><br>Open the closet.</a>
-	<a data-goto="2" data-goto-arg-id="0" data-showif-arg-notvisited="2"><br>Look around for clues.</a>
+	<a data-goto="3" data-showif-notvisited="3"><br>Open the closet.</a>
+	<a data-goto="2" data-goto-arg-id="0" data-showif-notvisited="2"><br>Look around for clues.</a>
 	<a data-goto="9"><br>Turn right and walk out of the room.</a>
-	<a data-goto="4" data-showif-arg-notvisited="4"><br>Go back to bed.</a>
-	<a data-goto="2" data-showif-arg-notvisited="2"><br>Look under your bed.</a>
+	<a data-goto="4" data-showif-notvisited="4"><br>Go back to bed.</a>
+	<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
 </div>
 
 <div data-page="8">
-	<p data-showif-arg-notvisited="[3, 5]">For some reason, you've done it. You jumped out of the window.</p>
+	<p data-showif-notvisited="[3, 5]">For some reason, you've done it. You jumped out of the window.</p>
 	
-	<p data-showif-arg-visited="[3, 5]">"JEREMY, HERE I COME!!!"</p>
+	<p data-showif-visited="[3, 5]">"JEREMY, HERE I COME!!!"</p>
 	
-	<p data-showif-arg-visited="[3, 5]">You have jumped out of the window.</p>
+	<p data-showif-visited="[3, 5]">You have jumped out of the window.</p>
 	
 	<p>Did you land safely? You're not sure. Not sure of anything anymore. You seem to have lost your senses. You feel at ease with the world. To you, earthly matters are no longer of any concern.
 	
@@ -167,13 +178,13 @@
 </div>
 
 <div data-page="9">
-	<p>You decide to walk out of the room and investigate. <span data-showif-arg-visited="3">"If Jeremy is the one behind this, he might still be around. I'll catch him red-handed!".</span></p>
+	<p>You decide to walk out of the room and investigate. <span data-showif-visited="3">"If Jeremy is the one behind this, he might still be around. I'll catch him red-handed!".</span></p>
 	
 	<p>You reach your hand towards the door handle and try to open the door.</p>
 	
 	<p>The door doesn't budge.</p>
 	
-	<p>A quick surge of anxiety goes over you. "Why is the door closed? I never lock my bedroom door. What happened? Is this a joke?<span data-showif-arg-visited="3"> Jeremy, if you're still here, this is not a joke.</span>"</p>
+	<p>A quick surge of anxiety goes over you. "Why is the door closed? I never lock my bedroom door. What happened? Is this a joke?<span data-showif-visited="3"> Jeremy, if you're still here, this is not a joke.</span>"</p>
 	
 	<p>"Keys, that's right." - you say as you calm down - "My keys should be here somewhere. I must have locked the door by accident yesterday"</p>
 	
@@ -181,14 +192,14 @@
 	
 	<p>"Now, where could I have put them."</p>
 	
-	<a data-goto="11"><br>Check the closet<span data-showif-arg-visited="3"> again</span>.</a>
-	<a data-goto="10"><br>Look under the bed<span data-showif-arg-visited="2"> again</span>.</a>
+	<a data-goto="11"><br>Check the closet<span data-showif-visited="3"> again</span>.</a>
+	<a data-goto="10"><br>Look under the bed<span data-showif-visited="2"> again</span>.</a>
 </div>
 
 <div data-page="10">
-	<p data-showif-arg-visited="2">You decide to check the ol' bed again. You're not sure why... you've looked there before and found nothing, but you weren't particularly searching for keys before.</p>
+	<p data-showif-visited="2">You decide to check the ol' bed again. You're not sure why... you've looked there before and found nothing, but you weren't particularly searching for keys before.</p>
 	
-	<p data-showif-arg-notvisited="2">You wonder if your keys might've fallen under the bed while you were sleeping.</p>
+	<p data-showif-notvisited="2">You wonder if your keys might've fallen under the bed while you were sleeping.</p>
 	
 	<p>You walk up to the bed and lay on the floor.</p>
 	
@@ -196,13 +207,13 @@
 	
 	<p>Nothing. Just a bunch of dust.</p>
 	
-	<a data-goto="11"><br>Check the closet<span data-showif-arg-visited="3"> again</span>.</a>
+	<a data-goto="11"><br>Check the closet<span data-showif-visited="3"> again</span>.</a>
 </div>
 
 <div data-page="11">
-	<p data-showif-arg-visited="10">Well, I suppose that leaves the closet then.<span data-showif-arg-visited="3"> I haven't really looked very hard when I was searching for Jeremy.</span><span data-showif-arg-notvisited="3"> You haven't really looked in there after all.</span></p>
+	<p data-showif-visited="10">Well, I suppose that leaves the closet then.<span data-showif-visited="3"> I haven't really looked very hard when I was searching for Jeremy.</span><span data-showif-notvisited="3"> You haven't really looked in there after all.</span></p>
 	
-	<p data-showif-arg-notvisited="10">Right, I must have left the keys in my work clothes from yesterday. Let's have a look.</p>
+	<p data-showif-notvisited="10">Right, I must have left the keys in my work clothes from yesterday. Let's have a look.</p>
 	
 	<p>You open the closet.</p>
 	
@@ -216,9 +227,9 @@
 	
 	<p>Darkness.</p>
 	
-	<p data-showif-arg-visited="7">You jump back from the closet and fall right through the open window.</p>
+	<p data-showif-visited="7">You jump back from the closet and fall right through the open window.</p>
 	
-	<p data-showif-arg-notvisited="7">You jump back from the closet and hit the window opposite of it. You look around. "Did the lamp break? Am I crazy?". You see nothing. Soon, you feel nothing.</p>
+	<p data-showif-notvisited="7">You jump back from the closet and hit the window opposite of it. You look around. "Did the lamp break? Am I crazy?". You see nothing. Soon, you feel nothing.</p>
 	
 	<p>Your presence is no more.</p>
 	
@@ -237,6 +248,14 @@
 	<p>"I must have been dreaming... it felt so real though." - you wonder.</p>
 
 	<p>Your eyes shift towards the closet. The note is not there.</p>
+	
+	<div data-showif-hasitem="starting_note" data-item="starting_note" data-item-action="remove">
+		<p>You freeze for a second. "The note... it's not there. That means there shouldn't be a note in my pocket..."</p>
+		
+		<p data-item="blank_note" data-item-name="Blank note" data-item-description="A blank post-it note.">You reach your hand into your pocket and find a blank post-it note. You don't know what to make out of this.</p>
+		
+		<p data-item="blank_note" data-item-name="Blank note" data-item-description="A blank post-it note.">You reach your hand into your pocket and find a blank post-it note. You don't know what to make out of this.</p>
+	</div>
 	
 	<p>You sit and wonder for a second. What should you do?</p>
 	
@@ -287,8 +306,8 @@
 	
 	<p data-showif-arg-id="0">You look in the closet. Work clothes, sleep clothes, shoes. Nothing out of the ordinary.</p>
 	
-	<p data-showif-arg-id="3">You walk towards the window. It's visibly bright outside.<span data-showif-arg-visited="3"> You can see the house where Jeremy lives, but no sign of him.</span></p>
-	<p data-showif-arg-id="5">You walk towards the window. It's visibly bright outside.<span data-showif-arg-visited="3"> You can see the house where Jeremy lives, but no sign of him.</span></p>
+	<p data-showif-arg-id="3">You walk towards the window. It's visibly bright outside.<span data-showif-visited="3"> You can see the house where Jeremy lives, but no sign of him.</span></p>
+	<p data-showif-arg-id="5">You walk towards the window. It's visibly bright outside.<span data-showif-visited="3"> You can see the house where Jeremy lives, but no sign of him.</span></p>
 	
 	<p>You should probably go and make some breakfast.</p>
 	
