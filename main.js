@@ -464,8 +464,6 @@ function Logic() {
 		if(value === null)
 			return null;
 		
-		console.log(value);
-		
 		try {
 			return JSON.parse(value);
 		}
