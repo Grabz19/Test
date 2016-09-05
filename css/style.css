@@ -23,12 +23,25 @@ input {
 }
 
 .infobox {
+	display: table;
 	width: 100%;
-	min-height: 62px;
+	height: 62px;
 	border: 1px #dedede solid;
 	padding-left: 3px;
 	padding-right: 3px;
 	text-align: center;
+}
+
+.infobox span {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.item-retrieved {
+	color: #b73333;
+}
+.item-retrieved:hover {
+	color: #7c2323;
 }
 
 .btn {

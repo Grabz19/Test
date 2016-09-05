@@ -4,6 +4,12 @@
 	data-page - Number. Used in the root elements only, to mark separate pages.
 	data-page-flag-resetvisited - Number or Array of Number. Only works if the element also has data-page. Resets the visit counter on specified page or pages to zero before this page is loaded.
 	
+	data-item - String or Array of String. This makes the element clickable, which in turn adds the item or items of the specified names to the inventory. Can be used as page attribute, which automatically adds the item to the inventory when the page is loaded.
+	data-item-amount - Number or Array of Number. Only works if the element also has data-item. Specifies the number of items or uses to give this item. If this isn't specified, the item receives 1 use.
+	data-item-name - String or Array of String. Only works if the element also has data-item. Specifies the display name for the item or items.
+	data-item-description - String or Array of String. Only works if the element also has data-item. Specifies the display description for the item.
+	data-item-description-override - Boolean. Only works if the element also has data-item-description. If true, if player already has this item, it will receive the specified description. If false, the specified description will be ignored. Defaults to false.
+	
 	data-goto - Number. Makes the element clickable and leads to the selected page.
 	data-goto-arg-id - Number. Only works if the element also has data-goto. Sends an id to the target page.
 	
@@ -37,7 +43,7 @@
 
 	<p>You walk up to the window to your left and peek through the curtain. It's pitch black outside.</p>
 
-	<p>As you look, you spot an unfamiliar reflection in the window. You turn around quickly. There is a note on your closet. It reads "7RC9". The letters are inscribed with crayons, and the handwriting looks as if it was written by a child. You decide to keep the note.</p>
+	<p>As you look, you spot an unfamiliar reflection in the window. You turn around quickly. There is a note on your closet. It reads "7RC9". The letters are inscribed with crayons, and the handwriting looks as if it was written by a child. <a data-item="starting_note" data-item-name="Note from the closet" data-item-description='A mysterious note you found on your bedroom closet. It reads "7RC9", written by a child with crayons.'>Do you keep the note?</p>
 	
 	<a data-goto="3"><br>Open the closet.</a>
 	<a data-goto="2" data-goto-arg-id="0"><br>Look around for clues.</a>

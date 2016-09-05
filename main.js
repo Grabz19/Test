@@ -1,3 +1,5 @@
+"use strict";
+
 function PageLoader(src) {
 	var listener = null;
 	
@@ -56,15 +58,24 @@ function Page(node, visited) {
 	this.visited = visited;
 }
 
+function InventoryItem(name, amount, displayName, description) {
+	this.name = name;
+	this.amount = amount;
+	this.displayName = displayName;
+	this.description = description;
+}
+
 function Logic() {
 	var pageContainer = document.getElementById('page_container');
 	var inventoryContainer = document.getElementById('inventory_container');
 	var inventoryInfobox = document.getElementById('inventory_infobox');
 	
 	var pages = null;
+	var inventory = null;
 	
 	function initialize(rawPageArray) {
 		pages = [];
+		inventory = [];
 		
 		var i, j;
 		for(i = 0; i < rawPageArray.length; i++) {
@@ -74,6 +85,111 @@ function Logic() {
 			}
 			
 			pages[i] = new Page(rawPageArray[i], 0);
+		}
+	}
+	
+	function clearInventory() {
+		inventory.splice(0, inventory.length);
+		displayInventory();
+	}
+	
+	function addItemToInventory(inventoryItem, override) {
+		if(inventoryItem instanceof InventoryItem) {
+			var i;
+			for(i = 0; i < inventory.length; i++) {
+				if(inventoryItem.name == inventory[i].name) {
+					if(inventoryItem.amount === null)
+						inventory[i].amount++;
+					else
+						inventory[i].amount += inventoryItem.amount;
+					
+					if(inventoryItem.displayName)
+						inventory[i].displayName = inventoryItem.displayName;
+					if(override && inventoryItem.description)
+						inventory[i].description = inventoryItem.description;
+					
+					displayInventory();
+					return true;
+				}
+			}
+			inventory.push(inventoryItem);
+			displayInventory();
+			return true;
+		}
+		return false;
+	}
+	
+	function addItemToInventoryFromNode(node) {
+		var item = getSpecialAttribute(node, "item");
+		
+		if(item !== null) {
+			var itemAmount = getSpecialAttribute(node, "item-amount");
+			var itemName = getSpecialAttribute(node, "item-name");
+			var itemDescription = getSpecialAttribute(node, "item-description");
+			var itemDescriptionOverride = getSpecialAttribute(node, "item-description-override");
+			
+			var inventoryItem = new InventoryItem(
+				item,
+				itemAmount === null ? 1 : itemAmount,
+				itemName,
+				itemDescription
+			);
+			
+			addItemToInventory(inventoryItem, itemDescriptionOverride === null ? false : itemDescriptionOverride);
+			return true;
+		}
+		return false;
+	}
+	
+	function removeItemFromInventory(name, amount) {
+		var i;
+		for(i = 0; i < inventory.length; i++) {
+			if(inventory[i].name == name) {
+				inventory[i].amount -= amount;
+				
+				if(inventory[i].amount == 0) {
+					inventory.splice(i, 1);
+					displayInventory();
+					return true;
+				}
+				else if(inventory[i].amount < 0) {
+					inventory[i].amount += amount;
+					return false;
+				}
+				else {
+					displayInventory();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	function displayInventory() {
+		var i, node;
+		for(i = 0; i < inventoryContainer.children.length; i++) {
+			node = inventoryContainer.children[i];
+			node.onmouseover = "";
+			node.onmouseout = "";
+		}
+		
+		inventoryContainer.innerHTML = "";
+		
+		for(i = 0; i < inventory.length; i++) {
+			node = document.createElement("a");
+			node.innerHTML = inventory[i].displayName + " " + inventory[i].amount + "<br>";
+			
+			node.onmouseover = (function(a) {
+				return function() {
+					inventoryInfobox.innerHTML = "<span>" + a + "</span>";
+				}
+			})(inventory[i].description);
+			
+			node.onmouseout = function() {
+				inventoryInfobox.innerHTML = "";
+			}
+			
+			inventoryContainer.appendChild(node);
 		}
 	}
 	
@@ -104,6 +220,7 @@ function Logic() {
 			
 			parseNodeTargetPage(node, pageNext);
 			parseNodeVisibility(node, args ? args.id : null);
+			parseNodeTargetAddToInventory(node);
 			parseNodeTargetRestart(node);
 		}
 		
@@ -116,10 +233,7 @@ function Logic() {
 	function applyFlags(page) {
 		var resetVisited = getSpecialAttribute(page, "page-flag-resetvisited");
 		
-		if(resetVisited === null)
-			return false;
-		else {
-			
+		if(resetVisited !== null) {
 			if(resetVisited instanceof Array) {
 				for(var i = 0; i < resetVisited.length; i++) {
 					pages[resetVisited[i]].visited = 0;
@@ -128,14 +242,21 @@ function Logic() {
 			else {
 				pages[resetVisited].visited = 0;
 			}
-			return true;
 		}
+		
+		addItemToInventoryFromNode(page);
 	}
 	
 	function parseNodeTargetRestart(node) {
 		var gameOver = getSpecialAttribute(node, "gameover");
-		if(gameOver !== null)
-			node.onclick = restart;
+		if(gameOver !== null) {
+			var f = function() {
+				restart();
+				node.removeEventListener("click", f);
+			}
+			
+			node.addEventListener("click", f);
+		}
 	}
 	
 	function parseNodeTargetPage(node, currentPage) {
@@ -150,11 +271,22 @@ function Logic() {
 			sendArgs.id = argId;
 		}
 		
-		node.onclick = (function(a, b, c) {
-			return function() {
-				servePage(a, b, c);
+		var f = function() {
+			servePage(targetPage, currentPage, sendArgs);
+			node.removeEventListener("click", f);
+		}
+		
+		node.addEventListener("click", f);
+	}
+	
+	function parseNodeTargetAddToInventory(node) {
+		var f = function() {
+			if(addItemToInventoryFromNode(node)) {
+				node.className += " item-retrieved";
 			}
-		})(targetPage, currentPage, sendArgs);
+			node.removeEventListener("click", f);
+		}
+		node.addEventListener("click", f);
 	}
 	
 	function parseNodeVisibility(node, id) {
@@ -234,16 +366,30 @@ function Logic() {
 	
 	function restart() {
 		resetVisited();
+		clearInventory();
 		servePage(1, null, null);
 	}
 	
 	function getSpecialAttribute(node, attribute) {
-		return JSON.parse(node.getAttribute("data-" + attribute));
+		var value = node.getAttribute("data-" + attribute);
+		if(value === null)
+			return null;
+		
+		value.replace("'", '"');
+		
+		try {
+			return JSON.parse(value);
+		}
+		catch(e) {
+			return value;
+		}
 	}
 	
 	return {
 		initialize : initialize,
 		servePage : servePage,
+		addItemToInventory : addItemToInventory,
+		removeItemFromInventory : removeItemFromInventory,
 		restart : restart
 	}
 }
