@@ -13,10 +13,10 @@
 	data-item-eventtype - String. Can be either "auto" or "click". "auto" makes the player receive the item automatically. "click" requires the player to click on the node. Optional. Defaults to "auto".
 	
 	data-goto - Number. Makes the element clickable and leads to the selected page.
-	data-goto-arg-id - Number. Only works if the element also has data-goto. Sends an id to the target page.
+	data-goto-arg-*** - Object. Only works if the element also has data-goto. Sends an argument of the specified name *** to the target page.
 	
-	data-showif-arg-id - Number or Array of Number. Makes the element visible only if the specified id or one of the specified ids was sent.
-	data-showif-arg-notid - Number or Array of Number. Makes the element visible only if the specified id or one of the specified ids was not sent.
+	data-showif-arg-*** - Object or Array of Object. Makes the element visible only if the specified argument *** or one of the specified arguments was sent. The argument can't start with not
+	data-showif-notarg*** - Object or Array of Object. Makes the element visible only if the specified argument *** or one of the specified arguments was not sent.
 	
 	data-showif-visited - Number or Array of Number. Makes the element visible if the specified page or pages were visited at least once.
 	data-showif-visited-times - Number or Array of Number. Only works if the element also has data-showif-visited. Specifies the number of times the specified page has to have been visited for the element to be visible.
@@ -41,7 +41,9 @@
 	<a data-item="cellphone" data-item-amount="1" data-item-name="Cellphone" data-item-eventtype="click" data-item-description='A cellphone.'>Do you pick up the cellphone?</a>
 	<span data-item='["rock","stick"]' data-item-amount='[5,10]' data-item-name='["Rock","Stick"]' data-item-eventtype="auto" data-item-description='["Bunch of rocks branded \"Rock Bottom\". They&apos;re just rocks, actually.", "Will 10 sticks make a shack? I don&apos;t know, do you?"]'></span>
 -->
-
+<div data-page="0">
+	
+</div>
 <div data-page="1">
 	<span data-item="cellphone" data-item-name="Cellphone" data-item-description="Your cellphone."></span>
 	<p>You regain consciousness as you hear the buzzing sound of a familiar alarm clock.</p>
@@ -57,7 +59,7 @@
 	<p>As you look, you spot an unfamiliar reflection in the window. You turn around quickly. There is a note on your closet. It reads "7RC9". The letters are inscribed with crayons, and the handwriting looks as if it was written by a child. <a data-item="starting_note" data-item-amount="1" data-item-name="Note from the closet" data-item-eventtype="click" data-item-description='A mysterious note you found on your bedroom closet. It reads "7RC9", written by a child with crayons.'>Do you keep the note?</a></p>
 	
 	<a data-goto="3"><br>Open the closet.</a>
-	<a data-goto="2" data-goto-arg-id="0"><br>Look around for clues.</a>
+	<a data-goto="2" data-goto-arg-id="clues"><br>Look around for clues.</a>
 	<a data-goto="9"><br>Turn right and walk out of the room.</a>
 	<a data-goto="5"><br>Look through the window again.</a>
 	<a data-goto="2"><br>Look under your bed.</a>
@@ -66,7 +68,7 @@
 </div>
 
 <div data-page="2">
-	<p data-showif-arg-id="0">You decide to look around for clues. At quick glance, there does not appear to be anything particularly unusual about your bedroom. You're not exactly sure what you're even looking for.</p>
+	<p data-showif-arg-id="clues">You decide to look around for clues. At quick glance, there does not appear to be anything particularly unusual about your bedroom. You're not exactly sure what you're even looking for.</p>
 	<p>Out of sheer curiosity, you decide to look under the bed. You walk up to it and lay on your side, pressing your head against the floor. You hesitate for a second, reassuring yourself that tales about monsters under the bed are just fiction. You pull up the sheets.</p>
 
 	<p>Nothing.</p>
@@ -92,7 +94,7 @@
 	
 	<p>Nothing unusual whatsoever. Just your regular old clothes. Buzzkill.</p>
 
-	<a data-goto="2" data-goto-arg-id="0" data-showif-notvisited="2"><br>Look around for clues.</a>
+	<a data-goto="2" data-goto-arg-id="clues" data-showif-notvisited="2"><br>Look around for clues.</a>
 	<a data-goto="9"><br>Turn left and walk out of the room.</a>
 	<a data-goto="4" data-showif-visited="7"><br>Go back to bed.</a>
 	<a data-goto="5" data-showif-notvisited="5"><br>Look through the window again.</a>
@@ -131,7 +133,7 @@
 	<p data-showif-visited="3">There is no sign of Jeremy. The darkness makes it impossible to see, anyway.</p>
 
 	<a data-goto="3" data-showif-notvisited="3"><br>Open the closet.</a>
-	<a data-goto="2" data-goto-arg-id="0" data-showif-notvisited="2"><br>Look around for clues.</a>
+	<a data-goto="2" data-goto-arg-id="clues" data-showif-notvisited="2"><br>Look around for clues.</a>
 	<a data-goto="9"><br>Turn right and walk out of the room.</a>
 	<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
 	<a data-goto="6" data-showif-notvisited="6"><br>Climb out of the window.</a>
@@ -161,7 +163,7 @@
 	<p data-showif-notvisited="5">Complete darkness.</p>
 	
 	<a data-goto="3" data-showif-notvisited="3"><br>Open the closet.</a>
-	<a data-goto="2" data-goto-arg-id="0" data-showif-notvisited="2"><br>Look around for clues.</a>
+	<a data-goto="2" data-goto-arg-id="clues" data-showif-notvisited="2"><br>Look around for clues.</a>
 	<a data-goto="9"><br>Turn right and walk out of the room.</a>
 	<a data-goto="4" data-showif-notvisited="4"><br>Go back to bed.</a>
 	<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
@@ -307,7 +309,7 @@
 	
 	<p data-showif-arg-id="5">You stand up from the ground.</p>
 	
-	<p>"Hmm... that sounded weird. Normally I would have probably been fired. Oh well, a day's off is a day's off.<span data-showif-arg-notid="1"> Now, what was I doing...</span>"</p>
+	<p>"Hmm... that sounded weird. Normally I would have probably been fired. Oh well, a day's off is a day's off.<span data-showif-notarg-id="1"> Now, what was I doing...</span>"</p>
 	
 	<p data-showif-arg-id="0">You look in the closet. Work clothes, sleep clothes, shoes. Nothing out of the ordinary.</p>
 	
@@ -327,9 +329,9 @@
 	
 	<p data-item="gun" data-item-name="Colt 1911" data-item-description="Old fashioned, but does the job.">You take your gun from the shelf.</p>
 	
-	<div data-showif-arg-notid="0">
+	<div data-showif-notarg-id="0">
 		<a data-goto="3" data-showif-notvisited="3"><br>Open the closet.</a>
-		<a data-goto="2" data-goto-arg-id="0" data-showif-notvisited="2"><br>Look around for clues.</a>
+		<a data-goto="2" data-goto-arg-id="clues" data-showif-notvisited="2"><br>Look around for clues.</a>
 		<a data-goto="9"><br>Turn right and walk out of the room.</a>
 		<a data-goto="5" data-showif-notvisited="5"><br>Look through the window again.</a>
 		<a data-goto="2" data-showif-notvisited="2"><br>Look under your bed.</a>
