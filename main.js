@@ -209,6 +209,7 @@ function Logic() {
 				var child = parent.children[i];
 				
 				parseNodeVisibility(child, args ? args.id : null);
+				parseNodeAddSyntax(child);
 				
 				if(child.style.display != "none") {
 					parseNodeTargetPage(child, pageNext);
@@ -356,6 +357,18 @@ function Logic() {
 		}
 	}
 	
+	function parseNodeAddSyntax(node) {
+		var gotoPage = getSpecialAttribute(node, "goto");
+		if(gotoPage === null)
+			return;
+		
+		console.log(node);
+		
+		var index = node.innerHTML.search(/>(?!<)/);
+		index = index > 0 ? index + 1 : 0;
+		node.innerHTML = [node.innerHTML.slice(0, index), "[Page " + gotoPage + "] ", node.innerHTML.slice(index)].join("");
+	}
+	
 	function parseNodeVisibility(node, id) {
 		var isVisibleArr = [];
 		
@@ -450,7 +463,7 @@ function Logic() {
 				var arr = [];
 				var i;
 				for(i = 0; i < attribPage.length; i++) {
-					if(falseIfVisited ? (pages[attribPage[i]].visited >= attribTimes[i]) : (pages[attribPage[i]].visited < attribTimes[i]))
+					if(falseIfVisited ? (pages[attribPage[i]].visited >= (attribTimes instanceof Array ? attribTimes[i] : attribTimes)) : (pages[attribPage[i]].visited < (attribTimes instanceof Array ? attribTimes[i] : attribTimes)))
 						arr.push(false);
 					else
 						arr.push(true);
