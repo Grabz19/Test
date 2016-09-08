@@ -4,21 +4,28 @@
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/style.css">
 </head>
-<body class="noselect">
-	<div class="container-fluid">
-		<div class="row">
-			<div class="col-md-4">
-				<div id="page_container"></div>
-			</div>
-			<div class="col-md-3">
-				<div class="infobox" id="inventory_infobox"></div>
-				Inventory:<br>
-				<div id="inventory_container"></div>
-			</div>
-			<div class="col-md-5"></div>
+<body class="flex-col noselect">
+	<div class="flex-row" style="flex: 0 1 100%">
+		<div class="pane border scroll" style="flex: 0 1 45%">
+			<div id="page_container"></div>
 		</div>
+		<div class="flex-col" style="flex: 0 1 25%">
+			<div class="pane border" style="flex: 0 1 62px">
+				<div class="infobox" id="inventory_infobox"></div>
+			</div>
+			<div class="flex-row" style="flex: 1 1">
+				<div class="flex-col pane border" style="flex: 0 1 70%">
+					<span>Inventory:</span>
+					<div class="scroll" style="flex: 1 0" id="inventory_container"></div>
+				</div>
+				<div class="flex-col pane border" style="flex: 0 1 30%">
+					<span>Stats:</span>
+					<div class="scroll" style="flex: 1 0" id="stats_container"></div>
+				</div>
+			</div>
+		</div>
+		<div style="flex: 0 1 30%"></div>
 	</div>
-	
 	<script type="text/javascript" src="main.js"></script>
 </body>
 </html>

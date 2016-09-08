@@ -5,12 +5,14 @@
 	data-page-flag-resetvisited - Number or Array of Number. Only works if the element also has data-page. Resets the visit counter on specified page or pages to zero before this page is loaded.
 	
 	data-item - String or Array of String. This makes the element clickable, which in turn adds the item or items of the specified names to the inventory.
-	data-item-action - String or Array of String. Supports three states - "add", "remove" or "modify". "add" by default.
-	data-item-amount - Number or Array of Number. Only works if the element also has data-item. Specifies the number of items or uses to give this item. For action "add", this is 1 by default.
-	data-item-name - String or Array of String. Only works if the element also has data-item. Specifies the display name for the item or items.
-	data-item-description - String or Array of String. Only works if the element also has data-item. Specifies the display description for the item.
-	data-item-description-override - Boolean. Only works if the element also has data-item-description. If true, if player already has this item, it will receive the specified description. If false, the specified description will be ignored. Defaults to false.
-	data-item-eventtype - String. Can be either "auto" or "click". "auto" makes the player receive the item automatically. "click" requires the player to click on the node. Optional. Defaults to "auto".
+	data-item-action - String or Array of String. Only works if the element also has data-item. Supports three states - "add", "remove" or "modify". "add" by default.
+	data-item-amount - Number or Array of Number. Only works if the element also has data-item. Specifies the number of items or uses to give this item. For action "add", this is 1 by default. For action "remove", this is all by default. Not used for action "modify".
+	data-item-name - String or Array of String. Only works if the element also has data-item. Specifies the display name for the item or items. Unless data-item-action is "modify", if the item already exists, this has no effect.
+	data-item-name-override - String or Array of String. Only works if the element also has data-item. Specifies the display name for the item or items. Takes priority over data-item-name, and replaces the name regardless of data-item-action.
+	data-item-description - String or Array of String. Only works if the element also has data-item. Specifies the display description for the item. Unless data-item-action is "modify", if the item already exists, this has no effect.
+	data-item-description-override - String or Array of String. Only works if the element also has data-item. Specifies the display description for the item or items. Takes priority over data-item-description, and replaces the description regardless of data-item-action.
+	data-item-eventtype - String. Can be either "auto" or "click". "auto" makes the player receive the item automatically when the page is loaded. "click" requires the player to click on the node. Optional. Defaults to "auto".
+	data-item-type - String or Array of String. "inventory" or "stats", by default "inventory"
 	
 	data-goto - Number. Makes the element clickable and leads to the selected page.
 	data-goto-arg-*** - Object. Only works if the element also has data-goto. Sends an argument of the specified name *** to the target page.
@@ -30,6 +32,10 @@
 	
 	data-gameover - String. Makes the element clickable which restarts the game.
 	
+	data-define-item - String. Name of the item. Children of this node are used to create name definitions.
+	data-define-item-minamount - Number. Must be a children of data-define-item. Specifies the minimum amount of this item for this name definition.
+	data-define-item-name - String. Must be a children of data-define-item and contain data-define-item-minamount. Name of the item.
+	data-define-item-description - String. Must be a children of data-define-item and contain data-define-item-minamount. Description of the item.
 	
 	EXAMPLES:
 	
@@ -40,12 +46,52 @@
 	
 	<a data-item="cellphone" data-item-amount="1" data-item-name="Cellphone" data-item-eventtype="click" data-item-description='A cellphone.'>Do you pick up the cellphone?</a>
 	<span data-item='["rock","stick"]' data-item-amount='[5,10]' data-item-name='["Rock","Stick"]' data-item-eventtype="auto" data-item-description='["Bunch of rocks branded \"Rock Bottom\". They&apos;re just rocks, actually.", "Will 10 sticks make a shack? I don&apos;t know, do you?"]'></span>
+	
+	<div data-define-item="coins">
+		<span data-define-item-minamount="1" data-define-item-name="Coin" data-define-item-description="You have a single, shiny coin. Got to start somewhere!"></span>
+		<span data-define-item-minamount="2" data-define-item-name="Coins" data-define-item-description="You have two shiny coins."></span>
+		<span data-define-item-minamount="3" data-define-item-name="Coins" data-define-item-description="You have a few shiny coins."></span>
+		<span data-define-item-minamount="10" data-define-item-name="Bunch of coins" data-define-item-description="You have a bunch of shiny coins."></span>
+	</div>
+	
+	
+	DEBUG EXAMPLES:
+	
+	<span data-item="cellphone"  data-item-description="Your cellphone."></span>
+	<span data-item="book" data-item-name="Book" data-item-description="Your book."></span>
+	<span data-item="watch" data-item-name="Watch" data-item-description="Your watch."></span>
+	<span data-item='["cellphone","book","watch"]'  data-item-name="Test" data-item-action='["add", "modify"]' data-item-description-override='["Not cellphone", "Not book", "Not watch"]'></span>
+	
+	
 -->
 <div data-page="0">
+	<no-content data-define-item="coins">
+		<no-content data-define-item-minamount="1" data-define-item-name="Coin" data-define-item-description="You have a single, shiny coin. Got to start somewhere!"></no-content>
+		<no-content data-define-item-minamount="2" data-define-item-name="Coins" data-define-item-description="You have two shiny coins."></no-content>
+		<no-content data-define-item-minamount="3" data-define-item-name="Coins" data-define-item-description="You have a few shiny coins."></no-content>
+		<no-content data-define-item-minamount="10" data-define-item-name="Bunch of coins" data-define-item-description="You have a bunch of shiny coins."></no-content>
+		<no-content data-define-item-minamount="50" data-define-item-name="Handful of coins" data-define-item-description="That's a lot of shiny coins."></no-content>
+		<no-content data-define-item-minamount="100" data-define-item-name="A wallet of coins" data-define-item-description="You found a wallet at some point. Useful for your incredible coinage."></no-content>
+		<no-content data-define-item-minamount="1000" data-define-item-name="A bag of coins" data-define-item-description="This might attract attention of bystanders."></no-content>
+		<no-content data-define-item-minamount="10000" data-define-item-name="A caravan filled with coins" data-define-item-description="Carrying this many coins would be impossible without a caravan! How convenient."></no-content>
+	</no-content>
 	
+	<no-content data-item="HP" data-item-type="stats" data-item-name="HP" data-item-description="Health." data-item-amount="30"></no-content>
+	<no-content data-item="LCK" data-item-type="stats" data-item-name="LCK" data-item-description="Luck."></no-content>
+	<no-content data-item="STR" data-item-type="stats" data-item-name="STR" data-item-description="Strength."></no-content>
+	<no-content data-item="DEX" data-item-type="stats" data-item-name="DEX" data-item-description="Dexterity."></no-content>
+	
+	<div data-statpicker-type="none">
+		<input type="range" data-stat="STR" min="0" max="10" step="1" value="0"></input>
+		<input type="range" data-stat="DEX" min="0" max="10" step="1" value="0"></input>
+	</div>
+	
+	<a data-goto="1"><br>Begin your adventure.</a>
 </div>
 <div data-page="1">
-	<span data-item="cellphone" data-item-name="Cellphone" data-item-description="Your cellphone."></span>
+	<no-content data-item="cellphone" data-item-name="Cellphone" data-item-description="Your cellphone."></no-content>
+	<no-content data-item="coins"></no-content>
+	
 	<p>You regain consciousness as you hear the buzzing sound of a familiar alarm clock.</p>
 
 	<p>It's 6:00 AM.</p>
