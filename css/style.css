@@ -1,12 +1,22 @@
 body {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	margin: 3px 3px 3px 3px;
+	
 	background-color: black;
 	color: #dedede;
-	margin: 4px 4px 4px 4px;
 }
 
 input {
 	background-color: black;
 	border-color: gray;
+}
+
+no-content {
+	display: none;
 }
 
 .noselect {
@@ -18,18 +28,36 @@ input {
 	user-select: none;
 }
 
-.container-fluid {
-	padding-left: 0;
+.flex-col {
+	display: flex;
+	flex-direction: column;
+}
+
+.flex-row {
+	display: flex;
+	flex-direction: row;
+}
+
+.pane {
+	margin: 3px 3px 3px 3px;
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-top: 1px;
+}
+
+.scroll {
+	overflow-y:auto;
+}
+
+.border {
+	border: 1px #dedede solid;
 }
 
 .infobox {
 	display: table;
-	width: 100%;
-	height: 62px;
-	border: 1px #dedede solid;
-	padding-left: 3px;
-	padding-right: 3px;
 	text-align: center;
+	width: 100%;
+	height: 100%;
 }
 
 .infobox span {
@@ -92,8 +120,4 @@ input {
     position: absolute;
     text-align: center;
     width: 100%;
-}
-
-.container-page {
-	width: 30%;
 }

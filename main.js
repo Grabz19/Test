@@ -93,24 +93,56 @@
 		this.visited = visited;
 	}
 
-	function InventoryItem(name, amount, displayName, description) {
-		this.name = name;
+	function InventoryItem(amount, displayName, description) {
 		this.amount = amount;
 		this.displayName = displayName;
 		this.description = description;
+	}
+	
+	function ItemDefinition(name, description) {
+		this.name = name;
+		this.description = description;
+	}
+	
+	function ItemDefinitionGroup() {
+		this.defs = {};
+	}
+	
+	ItemDefinitionGroup.prototype.addItemDefinition = function(minAmount, itemDefinition) {
+		if(itemDefinition instanceof ItemDefinition) {
+			this.defs[minAmount] = itemDefinition;
+		}
+	}
+	
+	ItemDefinitionGroup.prototype.getItemDefinition = function(minAmount) {
+		var def, previous = 0;
+		for(def in this.defs) {
+			if(def <= minAmount)
+				previous = def;
+			else
+				break;
+		}
+		if(previous == 0)
+			return null;
+		else
+			return this.defs[previous];
 	}
 
 	function Logic() {
 		var pageContainer = document.getElementById('page_container');
 		var inventoryContainer = document.getElementById('inventory_container');
+		var statsContainer = document.getElementById('stats_container');
 		var inventoryInfobox = document.getElementById('inventory_infobox');
 		
-		var pages = null;
-		var inventory = null;
+		var pages = [];
+		var inventory = {};
+		var stats = {};
+		
+		var itemDefinitionGroups = {};
 		
 		function initialize(rawPageArray) {
 			pages = [];
-			inventory = [];
+			inventory = {};
 			
 			var i, j;
 			for(i = 0; i < rawPageArray.length; i++) {
@@ -124,34 +156,112 @@
 		}
 		
 		function clearInventory() {
-			inventory.splice(0, inventory.length);
+			var i;
+			for(i in inventory)
+				delete inventory[i];
+
 			displayInventory();
 		}
 		
-		function addItemToInventory(inventoryItem, override) {
-			if(inventoryItem instanceof InventoryItem) {
-				var i;
-				for(i = 0; i < inventory.length; i++) {
-					if(inventoryItem.name == inventory[i].name) {
-						if(inventoryItem.amount === null || inventoryItem.amount <= 0) {
+		function clearStats() {
+			var i;
+			for(i in stats)
+				delete stats[i];
 
-						}
-						else
-							inventory[i].amount += inventoryItem.amount;
-						
-						if(inventoryItem.displayName)
-							inventory[i].displayName = inventoryItem.displayName;
-						if(override && inventoryItem.description)
-							inventory[i].description = inventoryItem.description;
-						
-						displayInventory();
-						return true;
-					}
+			displayStats();
+		}
+		
+		function addItemDefinitionGroup(itemStr, itemDefinitionGroup) {
+			if(itemDefinitionGroup instanceof ItemDefinitionGroup) {
+				itemDefinitionGroups[itemStr] = itemDefinitionGroup;
+			}
+		}
+		
+		function getItemDefinition(itemStr, minAmount) {
+			var itemDefinitionGroup = itemDefinitionGroups[itemStr];
+			if(itemDefinitionGroup === undefined)
+				return null;
+			return itemDefinitionGroup.getItemDefinition(minAmount);
+		}
+		
+		function registerStat(name, inventoryItem) {
+			if(inventoryItem instanceof InventoryItem) {
+				var stat = stats[name];
+				if(stat === undefined) {
+					stats[name] = inventoryItem;
+					if(stats[name].amount === null)
+						stats[name].amount = 0;
+					displayStats();
+					return true;
 				}
-				if(inventoryItem.amount === null || inventoryItem.amount <= 0)
-					return false;
+				else {
+					var i;
+					for(i in inventoryItem) {
+						if(inventoryItem[i] !== null)
+							stat[i] = inventoryItem[i];
+					}
+					displayStats();
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		function modifyStat(name, amount) {
+			if(stats[name] !== undefined) {
+				if(amount !== null) {
+					stats[name].amount += amount;
+					if(stats[name].amount < 0)
+						stats[name].amount = 0;
+				}
+				else {
+					stats[name].amount = 0;
+				}
+			}
+			else {
+				stats[name] = new InventoryItem(amount, null, null);
+			}
+			
+			displayStats();
+		}
+		
+		function addItemToInventory(name, inventoryItem, isNameOverride, isDescriptionOverride) {
+			if(inventoryItem instanceof InventoryItem) {
+				var isExisting = inventory[name] !== undefined;
+				var newInventoryItem = null;
 				
-				inventory.push(inventoryItem);
+				if(isExisting) {
+					if(inventoryItem.amount === null || inventoryItem.amount <= 0) {
+
+					}
+					else {
+						inventory[name].amount += inventoryItem.amount;
+					}
+					
+					if(inventoryItem.displayName !== null && (!inventory[name].displayName || isNameOverride))
+						inventory[name].displayName = inventoryItem.displayName;
+					if(inventoryItem.description !== null && (!inventory[name].description || isDescriptionOverride))
+						inventory[name].description = inventoryItem.description;
+					
+					newInventoryItem = inventory[name];
+				}
+				else {
+					if(inventoryItem.amount <= 0)
+						return false;
+					
+					inventory[name] = inventoryItem;
+					newInventoryItem = inventoryItem;
+				}
+				
+				var itemDefinition = getItemDefinition(name, newInventoryItem.amount);
+				
+				if(itemDefinition !== null) {
+					if(itemDefinition.name !== null)
+						newInventoryItem.displayName = itemDefinition.name;
+					if(itemDefinition.description !== null)
+						newInventoryItem.description = itemDefinition.description;
+				}
+				
 				displayInventory();
 				return true;
 			}
@@ -159,35 +269,36 @@
 		}
 		
 		function removeItemFromInventory(name, amount) {
-			var i;
-			for(i = 0; i < inventory.length; i++) {
-				if(inventory[i].name == name) {
-					inventory[i].amount -= amount;
+			if(inventory[name] !== undefined) {
+				var item = inventory[name];
+				
+				if(amount > 0)
+					item.amount -= amount;
+				else
+					item.amount = 0;
+				
+				if(item.amount == 0) {
+					delete inventory[name];
 					
-					if(inventory[i].amount == 0) {
-						inventory.splice(i, 1);
-						displayInventory();
-						return true;
-					}
-					else if(inventory[i].amount < 0) {
-						inventory[i].amount += amount;
-						return false;
-					}
-					else {
-						displayInventory();
-						return true;
-					}
+					displayInventory();
+					return true;
+				}
+				else if(item.amount < 0) {
+					item.amount += amount;
+					return false;
+				}
+				else {
+					displayInventory();
+					return true;
 				}
 			}
+			
 			return false;
 		}
 		
 		function getInventoryContainsItem(name, amount) {
-			var i;
-			for(i = 0; i < inventory.length; i++) {
-				if(inventory[i].name == name && inventory[i].amount >= amount)
-					return true;
-			}
+			if(inventory[name] !== undefined && inventory[name].amount >= amount)
+				return true;
 			return false;
 		}
 		
@@ -201,7 +312,7 @@
 			
 			inventoryContainer.innerHTML = "";
 			
-			for(i = 0; i < inventory.length; i++) {
+			for(i in inventory) {
 				node = document.createElement("a");
 				node.innerHTML = inventory[i].displayName + (inventory[i].amount > 1 ? " " + inventory[i].amount : "") + "<br>";
 				
@@ -219,6 +330,34 @@
 			}
 		}
 		
+		function displayStats() { //TODO merge this function with displayInventory if stats don't end up having a very discernable difference from inventory
+			var i, node;
+			for(i = 0; i < statsContainer.children.length; i++) {
+				node = statsContainer.children[i];
+				node.onmouseover = "";
+				node.onmouseout = "";
+			}
+			
+			statsContainer.innerHTML = "";
+			
+			for(i in stats) {
+				node = document.createElement("a");
+				node.innerHTML = stats[i].displayName + " " + stats[i].amount + "<br>";
+				
+				node.onmouseover = (function(a) {
+					return function() {
+						inventoryInfobox.innerHTML = "<span>" + a + "</span>";
+					}
+				})(stats[i].description);
+				
+				node.onmouseout = function() {
+					inventoryInfobox.innerHTML = "";
+				}
+				
+				statsContainer.appendChild(node);
+			}
+		}
+		
 		function resetVisited() {
 			for(var i = 0; i < pages.length; i++)
 				pages[i].visited = 0;
@@ -233,19 +372,29 @@
 			if(!pages || !pages[pageNext])
 				return false;
 			
-			if(pageNext == 0) {
+			/*if(pageNext == 0) {
 				console.log("Page 0");
 				
 				//parseInitializationPage
 				
 				servePage(1, 0, null);
 				return;
-			}
+			}*/
 			
 			var page = pages[pageNext].node.cloneNode(true);
 			var visited = pages[pageNext].visited;
 			
 			applyFlags(page);
+			
+			var i;
+			
+			if(pageNext <= 0) {
+				for(i = 0; i < page.children.length; i++) {
+					var child = page.children[i];
+					
+					parseNodeDefineItem(child);
+				}
+			}
 			
 			var iterator = function(parent) {
 				var i;
@@ -257,7 +406,7 @@
 					
 					if(child.style.display != "none") {
 						parseNodeTargetPage(child, pageNext);
-						parseNodeTargetAddToInventory(child);
+						parseNodeAddItem(child);
 						parseNodeTargetRestart(child);
 						
 						iterator(child);
@@ -288,6 +437,31 @@
 			}
 		}
 		
+		function parseNodeDefineItem(node) {
+			var defineItem = getSpecialAttribute(node, "define-item");
+			
+			if(defineItem === null)
+				return;
+			
+			var i, itemDefinitionGroup = new ItemDefinitionGroup();
+			var minAmount = null;
+			var name = null;
+			var description = null;
+			for(i = 0; i < node.children.length; i++) {
+				var child = node.children[i];
+				minAmount 	= getSpecialAttribute(child, "define-item-minamount");
+				if(minAmount === null)
+					continue;
+				
+				name 		= getSpecialAttribute(child, "define-item-name");
+				description = getSpecialAttribute(child, "define-item-description");
+				
+				itemDefinitionGroup.addItemDefinition(minAmount, new ItemDefinition(name, description));
+			}
+
+			addItemDefinitionGroup(defineItem, itemDefinitionGroup);
+		}
+		
 		function parseNodeTargetRestart(node) {
 			var gameOver = getSpecialAttribute(node, "gameover");
 			if(gameOver !== null) {
@@ -316,60 +490,109 @@
 			node.addEventListener("click", f);
 		}
 		
-		function parseNodeTargetAddToInventory(node) { //TODO this is all sorts of fucked up
+		function parseNodeAddItem(node) {
 			var item = getSpecialAttribute(node, "item");
 			if(item === null)
 				return;
 			
 			var itemAmount = getSpecialAttribute(node, "item-amount");
 			var itemName = getSpecialAttribute(node, "item-name");
+			var itemNameOverride = getSpecialAttribute(node, "item-name-override");
 			var itemDescription = getSpecialAttribute(node, "item-description");
 			var itemDescriptionOverride = getSpecialAttribute(node, "item-description-override");
 			var itemAction = getSpecialAttribute(node, "item-action");
-
-			var f = function(item, itemAmount, itemName, itemDescription, itemDescriptionOverride, itemAction) {
-				if(itemAction == "remove") {
-					removeItemFromInventory(item, ((itemAmount === null || itemAmount <= 0) ? 1 : itemAmount));
-				}
-				else if(itemAction == "add" || itemAction == "modify") {
-					var inventoryItem = new InventoryItem(
-						item,
-						itemAction == "modify" ? 0 : (itemAmount <= 0 ? 1 : itemAmount),
-						itemName,
-						itemDescription
-					);
-					
-					addItemToInventory(inventoryItem, itemDescriptionOverride);
-				}
-			}
+			var itemType = getSpecialAttribute(node, "item-type");
 			
-			var addItems = function(item, itemAmount, itemName, itemDescription, itemDescriptionOverride) {
-				if(item instanceof Array) {
-					for(var i = 0; i < item.length; i++) {
-						f(item[i], itemAmount[i], itemName[i], itemDescription[i], itemDescriptionOverride === null ? false : itemDescriptionOverride[i], itemAction === null ? "add" : itemAction[i]);
+			var addItems = function(item, itemAmount, itemName, itemNameOverride, itemDescription, itemDescriptionOverride, itemAction) {
+				if(!(item instanceof Array)) 					item = [item];
+				if(!(itemAmount instanceof Array)) 				itemAmount = [itemAmount];
+				if(!(itemName instanceof Array)) 				itemName = [itemName];
+				if(!(itemNameOverride instanceof Array)) 		itemNameOverride = [itemNameOverride];
+				if(!(itemDescription instanceof Array)) 		itemDescription = [itemDescription];
+				if(!(itemDescriptionOverride instanceof Array)) itemDescriptionOverride = [itemDescriptionOverride];
+				if(!(itemAction instanceof Array)) 				itemAction = [itemAction];
+				if(!(itemType instanceof Array)) 				itemType = [itemType];
+				
+				var _itemAmount = null;
+				var _itemName = null;
+				var _itemNameOverride = null;
+				var _itemDescription = null;
+				var _itemDescriptionOverride = null;
+				var _itemAction = null;
+				var _itemType = null;
+				
+				var isNameOverride = false;
+				var isDescriptionOverride = false;
+				var sendName = "";
+				var sendDescription = "";
+				
+				for(var i = 0; i < item.length; i++) {
+					_itemAmount 			 = itemAmount[i] === undefined ? itemAmount[0] : itemAmount[i];
+					_itemName 				 = itemName[i] === undefined ? itemName[0] : itemName[i];
+					_itemNameOverride		 = itemNameOverride[i] === undefined ? itemNameOverride[0] : itemNameOverride[i];
+					_itemDescription 		 = itemDescription[i] === undefined ? itemDescription[0] : itemDescription[i];
+					_itemDescriptionOverride = itemDescriptionOverride[i] === undefined ? itemDescriptionOverride[0] : itemDescriptionOverride[i];
+					_itemAction				 = itemAction[i] === undefined ? itemAction[0] : itemAction[i];
+					_itemType				 = itemType[i] === undefined ? itemType[0] : itemType[i];
+					
+					if(_itemAction != "add" && _itemAction != "remove" && _itemAction != "modify")
+						_itemAction = "add";
+					
+					if(_itemType != "inventory" && _itemType != "stats")
+						_itemType = "inventory";
+					
+					isNameOverride = _itemNameOverride ? true : false;
+					isDescriptionOverride = _itemDescriptionOverride ? true : false;
+					sendName = isNameOverride ? _itemNameOverride : _itemName;
+					sendDescription = isDescriptionOverride ? _itemDescriptionOverride : _itemDescription;
+					
+					if(_itemType == "inventory") {
+						if(_itemAction == "remove") {
+							removeItemFromInventory(item[i], ((_itemAmount === null || _itemAmount <= 0) ? -1 : _itemAmount));
+						}
+						else if(_itemAction == "add" || _itemAction == "modify") {
+							addItemToInventory(item[i],
+								new InventoryItem(
+									_itemAction == "modify" ? 0 : (_itemAmount <= 0 ? 1 : _itemAmount),
+									sendName,
+									sendDescription
+								),
+							_itemAction == "modify" ? true : isNameOverride, _itemAction == "modify" ? true : isDescriptionOverride);
+						}
+					}
+					else if(_itemType == "stats") {
+						if(_itemAction == "remove") {
+							modifyStat(item[i], _itemAmount === null ? null : -_itemAmount);
+						}
+						else if(_itemAction == "add" || _itemAction == "modify") {
+							if(sendName !== null || sendDescription !== null) {
+								registerStat(item[i], new InventoryItem(null, sendName, sendDescription));
+								if(_itemAmount !== null)
+									modifyStat(item[i], _itemAmount);
+							}
+							else if(_itemAmount !== null) {
+								modifyStat(item[i], _itemAmount);
+							}
+						}
 					}
 				}
-				else {
-					f(item, itemAmount, itemName, itemDescription, itemDescriptionOverride === null ? false : itemDescriptionOverride, itemAction === null ? "add" : itemAction);
-				}
 			}
-			
 			
 			var eventType = getSpecialAttribute(node, "item-eventtype");
 			
 			if(eventType === null || eventType == "auto") {
-				addItems(item, itemAmount, itemName, itemDescription, itemDescriptionOverride);
+				addItems(item, itemAmount, itemName, itemNameOverride, itemDescription, itemDescriptionOverride, itemAction);
 			}
 			else if(eventType == "click") {
-				var f2 = (function(a, b, c, d, e, f, g) {
+				var f2 = (function(a, b, c, d, e, f, g, h) {
 					var handler = function() {
-						a(b, c, d, e, f, g);
+						a(b, c, d, e, f, g, h);
 
 						node.className += " item-retrieved";
 						node.removeEventListener("click", handler);
 					}
 					return handler;
-				})(addItems, item, itemAmount, itemName, itemDescription, itemDescriptionOverride, itemAction);
+				})(addItems, item, itemAmount, itemName, itemNameOverride, itemDescription, itemDescriptionOverride, itemAction);
 				
 				node.addEventListener("click", f2);
 			}
@@ -467,7 +690,6 @@
 					isShowIfNotId.push(getId(args[arg], showIfNotArgs[arg], true));
 			}
 			
-			console.log(isShowIfId, showIfArgs, isShowIfNotId, showIfNotArgs);
 			return isShowIfId.indexOf(false) == -1 && isShowIfNotId.indexOf(false) == -1;
 		}
 		
@@ -515,6 +737,7 @@
 		function restart() {
 			resetVisited();
 			clearInventory();
+			clearStats();
 			servePage(0, null, null);
 		}
 		
@@ -526,11 +749,16 @@
 			var obj = {};
 			var i;
 			
+			prefix = prefix + "";
+			
+			if(prefix.length > 0 && prefix.charAt(prefix.length - 1) != "-")
+				prefix += "-";
+			
 			var attributes = node.attributes;
 			for(i = 0; i < attributes.length; i++) {
 				if(attributes[i].name.indexOf("data-" + prefix) == 0) {
 					
-					obj[util.getHyphenDemiliterToCamelCase(attributes[i].name.replace("data-" + prefix, ""))] = getParsedAttribute(attributes[i].value);
+					obj[attributes[i].name.replace("data-" + prefix, "")] = getParsedAttribute(attributes[i].value);
 				}
 			}
 			
@@ -549,6 +777,19 @@
 			}
 		}
 		
+		function getPages() {
+			return pages;
+		}
+		function getInventory() {
+			return inventory;
+		}
+		function getStats() {
+			return stats;
+		}
+		function getItemDefinitionGroups() {
+			return itemDefinitionGroups;
+		}
+		
 		return {
 			initialize : initialize,
 			restart : restart,
@@ -556,13 +797,22 @@
 			//DEBUG GLOBAL ACCESS
 			servePage : servePage,
 			addItemToInventory : addItemToInventory,
-			removeItemFromInventory : removeItemFromInventory
+			removeItemFromInventory : removeItemFromInventory,
+			registerStat : registerStat,
+			modifyStat : modifyStat,
+			
+			getPages : getPages,
+			getInventory : getInventory,
+			getStats : getStats,
+			getItemDefinitionGroups : getItemDefinitionGroups,
+			
+			InventoryItem : InventoryItem
 			//
 		}
 	}
 
 	var global = (function() {
-		var pl = new PageLoader("book.html");
+		var pl = new PageLoader("data.html");
 		pl.setCompletionListener(onLoaded);
 		pl.load();
 		
